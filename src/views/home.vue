@@ -4,7 +4,8 @@
         <div class="switch-container" v-for="(url, index) in urls" :key="index">
             <label :name="'switch' + (index + 1)">
                 <!-- 創建一個開關勾選框並將其綁定到 switches 陣列 -->
-                <input type="checkbox" class="l" v-model="switches[index]" @change="updateSwitch(index)">
+                <input type="checkbox" class="l" v-model="switches[index]" @change="updateSwitch(index)"
+                    :disabled="!hasPermission">
             </label>
             <!-- 顯示開關的狀態 -->
             <span class="status">{{ switches[index] ? (labels[index] + '走道On') : (labels[index] + '走道Off') }}</span>
@@ -16,61 +17,95 @@
 export default {
     data() {
         return {
-            // 用於存儲每個開關的狀態（開/關）
+            // 用于存储每个开关的状态（开/关）
             switches: [false, false, false],
-            // 每個開關與 ESP8266 交互的 URL
+            // 每个开关与 ESP8266 交互的 URL
             urls: ['http://192.168.50.242/gpio3', 'http://192.168.50.242/gpio5', 'http://192.168.50.242/gpio7'],
-            // 每個開關的標籤
+            // 每个开关的标签
             labels: ['第一排', '第二排', '第三排'],
-            // 存儲每個開關的 AbortController
+            // 存储每个开关的 AbortController
             controllers: [],
-            // 用於存儲每個開關的定時器 ID
+            // 用于存储每个开关的定时器 ID
             intervals: [],
+            // 存储 function1 的值
+            function1: null,
+            // 存储是否有权限的状态
+            hasPermission: false,
         };
     },
     methods: {
         async updateSwitch(index) {
-            // 獲取開關的當前狀態
-            const isChecked = this.switches[index];
-            // 確定發送到 ESP8266 的狀態（開/關）
-            const state = isChecked ? 'on' : 'off';
-            // 構建帶有引腳和狀態參數的 URL
-            const updateUrl = `http://192.168.50.242/gpio?pin=${index * 2 + 3}&state=${state}`;
-            try {
-                // 發送請求更新開關狀態
-                const controller = new AbortController();
-                this.controllers[index] = controller;
-                const response = await fetch(updateUrl, { signal: controller.signal });
-                if (!response.ok) {
-                    throw new Error('網絡響應不正常');
+            // 检查用户是否具有执行操作的权限（仅当 function1 的值为 1 时才允许操作）
+            if (this.hasPermission) {
+                // 获取开关的当前状态
+                const isChecked = this.switches[index];
+                // 确定发送到 ESP8266 的状态（开/关）
+                const state = isChecked ? 'on' : 'off';
+                // 构建带有引脚和状态参数的 URL
+                const updateUrl = `http://192.168.50.242/gpio?pin=${index * 2 + 3}&state=${state}`;
+                try {
+                    // 发送请求更新开关状态
+                    const controller = new AbortController();
+                    this.controllers[index] = controller;
+                    const response = await fetch(updateUrl, { signal: controller.signal });
+                    if (!response.ok) {
+                        throw new Error('网络响应异常');
+                    }
+                } catch (error) {
+                    console.error(`错误：${error}`);
                 }
-            } catch (error) {
-                console.error(`錯誤：${error}`);
+            } else {
+                // 没有权限，直接跳出提示框
+                alert('您没有权限执行此操作！');
             }
         },
         async updateStatus(index) {
             try {
-                // 發送請求獲取開關的當前狀態
+                // 发送请求获取开关的当前状态
                 const controller = new AbortController();
                 this.controllers[index] = controller;
                 const response = await fetch(this.urls[index], { signal: controller.signal });
                 if (!response.ok) {
-                    throw new Error('網絡響應不正常');
+                    throw new Error('网络响应异常');
                 }
-                // 解析響應以獲取狀態數據
+                // 解析响应以获取状态数据
                 const data = await response.json();
-                // 根據響應更新開關狀態
+                // 根据响应更新开关状态
                 this.switches[index] = data.state === 'on';
             } catch (error) {
-                console.error(`錯誤：${error}`);
+                console.error(`错误：${error}`);
             }
-        }
+        },
+        async checkPermission() {
+            try {
+                const response = await fetch('http://192.168.50.242/function1');
+                if (!response.ok) {
+                    throw new Error('网络响应异常');
+                }
+                const data = await response.json();
+                const newFunction1Value = data.function1;
+                // 将新的 function1 值更新到组件的状态中
+                this.function1 = newFunction1Value;
+                // 更新权限状态
+                this.hasPermission = this.function1 === 1;
+                // 如果没有权限，直接跳出
+                if (!this.hasPermission) {
+                    alert('您没有权限执行此操作！');
+                    throw new Error('没有权限');
+                }
+            } catch (error) {
+                console.error(`错误：${error}`);
+            }
+        },
     },
-    mounted() {
-        // 組件掛載時更新每個開關的狀態
+    async mounted() {
+        // 检查用户权限
+        await this.checkPermission();
+
+        // 组件挂载时更新每个开关的状态
         this.urls.forEach((url, index) => {
             this.updateStatus(index);
-            // 設置間隔定期更新開關狀態
+            // 设置间隔定期更新开关状态
             const intervalId = setInterval(() => {
                 this.updateStatus(index);
             }, 1000);
@@ -78,19 +113,17 @@ export default {
         });
     },
     beforeUnmount() {
-        // 組件卸載時取消所有請求
+        // 组件卸载时取消所有请求
         this.controllers.forEach(controller => {
             if (controller) {
                 controller.abort();
             }
         });
-        // 清除定時器
+        // 清除定时器
         this.intervals.forEach(interval => clearInterval(interval));
     }
 };
 </script>
-
-
 
 
 <style scoped>

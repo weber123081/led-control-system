@@ -5,33 +5,34 @@
                 <div class="column">
                     <div class="aisle1">第一排走道On</div>
                     <label for="time1">設定時間:</label>
-                    <input type="time" id="time1" name="time1" @change="updateFormParams">
+                    <input type="time" id="time1" name="time1" @change="updateFormParams" :disabled="!hasPermission">
                     <br><br>
                     <div class="aisle1">第二排走道On</div>
                     <label for="time2">設定時間:</label>
-                    <input type="time" id="time2" name="time2" @change="updateFormParams">
+                    <input type="time" id="time2" name="time2" @change="updateFormParams" :disabled="!hasPermission">
                     <br><br>
                     <div class="aisle1">第三排走道On</div>
                     <label for="time3">設定時間:</label>
-                    <input type="time" id="time3" name="time3" @change="updateFormParams">
+                    <input type="time" id="time3" name="time3" @change="updateFormParams" :disabled="!hasPermission">
                     <br><br>
                 </div>
                 <div class="column">
                     <div class="aisle2">第一排走道Off</div>
                     <label for="time4">設定時間:</label>
-                    <input type="time" id="time4" name="time4" @change="updateFormParams">
+                    <input type="time" id="time4" name="time4" @change="updateFormParams" :disabled="!hasPermission">
                     <br><br>
                     <div class="aisle2">第二排走道Off</div>
                     <label for="time5">設定時間:</label>
-                    <input type="time" id="time5" name="time5" @change="updateFormParams">
+                    <input type="time" id="time5" name="time5" @change="updateFormParams" :disabled="!hasPermission">
                     <br><br>
                     <div class="aisle2">第三排走道Off</div>
                     <label for="time6">設定時間:</label>
-                    <input type="time" id="time6" name="time6" @change="updateFormParams">
+                    <input type="time" id="time6" name="time6" @change="updateFormParams" :disabled="!hasPermission">
                     <br><br>
                 </div>
                 <!-- 提交表單按鈕 -->
-                <button class="button" type="button" @click="submitForm" style="margin-left: 50%;">確認</button>
+                <button class="button" type="button" @click="submitForm" style="margin-left: 50%;"
+                    :disabled="!hasPermission">確認</button>
             </form>
         </div>
         <h3>晶片時間:</h3>
@@ -45,7 +46,7 @@
 export default {
     data() {
         return {
-            esp8266Time: '',  // 用來儲存從 ESP8266 獲取的時間
+            esp8266Time: '',  // 用来存储从 ESP8266 获取的时间
             formData: {
                 time1: '',
                 time2: '',
@@ -54,14 +55,18 @@ export default {
                 time5: '',
                 time6: ''
             },
-            // 存儲定時器 ID
-            intervalId: null
+            // 存储定时器 ID
+            intervalId: null,
+            // 存储是否有权限的状态
+            hasPermission: false
         };
     },
     mounted() {
         this.getTimeFromESP8266();
-        this.loadFormData(); // 在組件掛載時載入表單資料
+        this.loadFormData(); // 在组件挂载时加载表单数据
         this.intervalId = setInterval(this.getTimeFromESP8266, 1000);
+        // 检查用户权限
+        this.checkPermission();
     },
     methods: {
         // 從 ESP8266 獲取時間
@@ -84,6 +89,12 @@ export default {
         },
         // 提交表單
         submitForm() {
+            // 检查用户权限
+            if (!this.hasPermission) {
+                alert("您没有权限执行此操作！");
+                return;
+            }
+
             const formData = new URLSearchParams(this.formData).toString();
 
             fetch('http://192.168.50.242/timeset', {
@@ -95,7 +106,7 @@ export default {
             })
                 .then(response => response.text())
                 .then(text => {
-                    alert("設定成功");
+                    alert("设置成功");
                 })
                 .catch(error => {
                     console.error(error);
@@ -115,14 +126,34 @@ export default {
                     document.getElementById(`time${i}`).value = this.formData[`time${i}`];
                 }
             }
-        }
+        },
+        // 檢查使用者權限
+        async checkPermission() {
+            try {
+                const response = await fetch('http://192.168.50.242/function2');
+                if (!response.ok) {
+                    throw new Error('網絡響應異常');
+                }
+                const data = await response.json();
+                const newFunction2Value = data.function2;
+                // 更新權限狀態
+                this.hasPermission = newFunction2Value === 1;
+                // 如果没有权限，弹出警告
+                if (!this.hasPermission) {
+                    alert("您没有权限执行此操作！");
+                }
+            } catch (error) {
+                console.error(`錯誤：${error}`);
+            }
+        },
     },
     beforeUnmount() {
-        // 清除定時器
+        // 清除定时器
         clearInterval(this.intervalId);
     }
 };
 </script>
+
 
 
 <style scoped>

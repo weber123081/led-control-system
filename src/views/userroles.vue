@@ -88,37 +88,172 @@ export default {
             userList: []  // 使用者清單
         };
     },
+    // 在 mounted 鉤子中發送 HTTP GET 請求以檢索帳戶資料
+    mounted() {
+        fetch("http://192.168.50.242/access")
+            .then(response => {
+                if (response.ok) {
+                    // 如果響應狀態碼為 200，則解析 JSON 格式的數據
+                    return response.json();
+                } else {
+                    throw new Error("無法檢索帳戶資料");
+                }
+            })
+            .then(data => {
+                // 將檢索到的帳戶資料賦值給 userList
+                this.userList = data;
+            })
+            .catch(error => {
+                // 捕獲任何可能的錯誤並顯示錯誤消息
+                console.error("發生錯誤：", error);
+            });
+    },
     methods: {
         // 切換表單顯示狀態的方法
         toggleForm() {
             this.showForm = !this.showForm;
         },
         // 提交表單的方法
+        // 提交表单的方法
         submitForm() {
-            this.userList.push({ ...this.formData });  // 將表單資料新增到使用者清單中
-            this.resetForm();  // 重置表單
-            this.showForm = false;  // 隱藏表單
+            // 创建一个 FormData 对象
+            const formData = new FormData();
+            // 将表单数据添加到 FormData 对象中
+            formData.append('name', this.formData.name);
+            formData.append('username', this.formData.username);
+            formData.append('password', this.formData.password);
+            // 将布尔类型的值转换为数值类型
+            formData.append('function1', this.formData.function1 ? 1 : 0);
+            formData.append('function2', this.formData.function2 ? 1 : 0);
+            formData.append('function3', this.formData.function3 ? 1 : 0);
+
+            // 检查表单中是否有 id，如果有，则视为编辑操作
+            if (this.formData.id) {
+                // 发送 HTTP POST 请求到后端 /updatedata 端点
+                fetch("http://192.168.50.242/updatedata", {
+                    method: "POST",
+                    body: formData  // 使用 FormData 对象作为请求体
+                })
+                    .then(response => {
+                        // 检查响应状态码
+                        if (response.ok) {
+                            // 如果响应状态码为 200，则表示成功
+                            console.log("用户已成功更新");
+                            // 重置表单并隐藏
+                            // 重置表单数据
+                            this.formData = {
+                                name: '',
+                                username: '',
+                                password: '',
+                                function1: false,
+                                function2: false,
+                                function3: false
+                            };
+                            this.showForm = false;
+                            this.loadUserData();
+                        } else {
+                            // 否则显示错误消息
+                            console.error("更新用户时出现错误");
+                        }
+                    })
+                    .catch(error => {
+                        // 捕获任何可能的错误并显示错误消息
+                        console.error("发生错误：", error);
+                    });
+            } else {
+                // 如果没有 id，则视为新增操作
+                // 发送 HTTP POST 请求到后端 /insertdata 端点
+                fetch("http://192.168.50.242/insertdata", {
+                    method: "POST",
+                    body: formData  // 使用 FormData 对象作为请求体
+                })
+                    .then(response => {
+                        // 检查响应状态码
+                        if (response.ok) {
+                            // 如果响应状态码为 200，则表示成功
+                            console.log("用户已成功新增");
+                            // 重置表单并隐藏
+                            // 重置表单数据
+                            this.formData = {
+                                name: '',
+                                username: '',
+                                password: '',
+                                function1: false,
+                                function2: false,
+                                function3: false
+                            };
+                            this.showForm = false;
+                        } else {
+                            // 否则显示错误消息
+                            console.error("新增用户时出现错误");
+                        }
+                    })
+                    .catch(error => {
+                        // 捕获任何可能的错误并显示错误消息
+                        console.error("发生错误：", error);
+                    });
+            }
         },
-        // 重置表單的方法
-        resetForm() {
-            this.formData = {
-                name: '',
-                username: '',
-                password: '',
-                function1: false,
-                function2: false,
-                function3: false
-            };
+        loadUserData() {
+            // 发送 HTTP GET 请求以检索用户数据
+            fetch("http://192.168.50.242/access")
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error("无法检索用户数据");
+                    }
+                })
+                .then(data => {
+                    // 更新用户列表数据
+                    this.userList = data;
+                    // 重置表单数据
+                    this.formData = {
+                        name: '',
+                        username: '',
+                        password: '',
+                        function1: false,
+                        function2: false,
+                        function3: false
+                    };
+                })
+                .catch(error => {
+                    console.error("发生错误：", error);
+                });
         },
-        // 編輯使用者的方法
         editUser(index) {
-            this.formData = { ...this.userList[index] };  // 將選中的使用者資料複製到表單中
-            this.userList.splice(index, 1);  // 從使用者清單中刪除選中的使用者
-            this.showForm = true;  // 顯示表單
+            // 將選中的使用者資料複製到表單中
+            this.formData = { ...this.userList[index] };
+            // 將使用者的 id 添加到表單中
+            this.formData.id = this.userList[index].id;
+            // 從使用者清單中刪除選中的使用者
+            this.userList.splice(index, 1);
+            // 顯示表單
+            this.showForm = true;
         },
         // 刪除使用者的方法
         deleteUser(index) {
-            this.userList.splice(index, 1);  // 從使用者清單中刪除選中的使用者
+            const usernameToDelete = this.userList[index].username;
+            const formData = new FormData();
+            formData.append("username", usernameToDelete);
+
+            // 发送 HTTP POST 请求到后端 /deletedata 端点
+            fetch("http://192.168.50.242/deletedata", {
+                method: "POST",
+                body: formData
+            })
+                .then(response => {
+                    if (response.ok) {
+                        console.log("用户已成功删除");
+                        // 删除成功后重新加载用户列表数据以更新表单
+                        this.loadUserData();
+                    } else {
+                        console.error("删除用户时出现错误");
+                    }
+                })
+                .catch(error => {
+                    console.error("发生错误：", error);
+                });
         }
     }
 };
