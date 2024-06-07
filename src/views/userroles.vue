@@ -1,79 +1,71 @@
 <template>
-    <div class="content">
+    <div class="content clearfix">
         <div class="left-column">
-            <!-- 點擊按鈕切換表單顯示狀態 -->
             <button @click="toggleForm" class="button1">新增使用者</button>
-            <!-- 使用 v-if 條件渲染表單，防止顯示在未切換時 -->
             <form v-if="showForm" @submit.prevent="submitForm">
                 <label for="name">姓名:</label>
-                <!-- 綁定輸入框與 formData 中的 name 屬性 -->
-                <input type="text" v-model="formData.name" required><br><br>
+                <input type="text" v-model="newUser.name" required><br><br>
 
                 <label for="username">帳號:</label>
-                <!-- 綁定輸入框與 formData 中的 username 屬性 -->
-                <input type="text" v-model="formData.username" required><br><br>
+                <input type="text" v-model="newUser.username" required><br><br>
 
                 <label for="password">密碼:</label>
-                <!-- 綁定輸入框與 formData 中的 password 屬性 -->
-                <input type="password" v-model="formData.password" required><br><br>
+                <input type="text" v-model="newUser.password" required><br><br>
 
                 <label>功能限制:</label><br>
-                <!-- 綁定複選框與 formData 中的 function1 屬性 -->
-                <input type="checkbox" id="checkbox1" v-model="formData.function1">
+                <input type="checkbox" id="checkbox1" v-model="newUser.function1">
                 <label for="checkbox1">開關控制</label><br>
 
-                <!-- 綁定複選框與 formData 中的 function2 屬性 -->
-                <input type="checkbox" id="checkbox2" v-model="formData.function2">
+                <input type="checkbox" id="checkbox2" v-model="newUser.function2">
                 <label for="checkbox2">時間控制</label><br>
 
-                <!-- 綁定複選框與 formData 中的 function3 屬性 -->
-                <input type="checkbox" id="checkbox3" v-model="formData.function3">
+                <input type="checkbox" id="checkbox3" v-model="newUser.function3">
                 <label for="checkbox3">權限控制</label><br><br>
 
-                <!-- 提交表單按鈕 -->
                 <input type="submit" value="提交">
-                <!-- 重置表單按鈕，點擊時重置表單資料 -->
-                <input type="reset" @click="resetForm" value="刪除">
+                <input type="reset" @click="resetNewUserForm" value="刪除">
             </form>
         </div>
+
         <div class="right-column">
             <h2>使用者清單</h2>
             <table>
                 <thead>
                     <tr>
                         <th>姓名</th>
-                        <th>帳號</th>
-                        <th>密碼</th>
-                        <th>功能限制</th>
+                        <th v-if="hasPermission">帳號</th>
+                        <th v-if="hasPermission">密碼</th>
+                        <th v-if="hasPermission">功能限制</th>
                         <th>設定</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     <tr v-for="(user, index) in userList" :key="index">
                         <template v-if="editingIndex !== index">
                             <td>{{ user.name }}</td>
-                            <td>{{ user.username }}</td>
-                            <td>{{ user.password }}</td>
-                            <td>
+                            <td v-if="hasPermission">{{ user.username }}</td>
+                            <td v-if="hasPermission">{{ hidePassword(user.password) }}</td>
+                            <td v-if="hasPermission">
                                 {{ user.function1 ? '開關控制 ' : '' }}
                                 {{ user.function2 ? '時間控制 ' : '' }}
                                 {{ user.function3 ? '權限控制 ' : '' }}
                             </td>
                             <td>
-                                <!-- 編輯按鈕，點擊時觸發 editUser 方法 -->
-                                <button @click="editUser(index)">編輯</button>
-                                <!-- 刪除按鈕，點擊時觸發 deleteUser 方法 -->
-                                <button @click="deleteUser(index)">刪除</button>
+                                <button @click="editUser(index)" :disabled="!hasPermission">編輯</button>
+                                <button @click="deleteUser(index)" :disabled="!hasPermission">刪除</button>
                             </td>
                         </template>
+
                         <template v-else>
-                            <td><input type="text" v-model="user.name"></td>
-                            <td><input type="text" v-model="user.username"></td>
-                            <td><input type="password" v-model="user.password"></td>
-                            <td>
-                                <input type="checkbox" v-model="user.function1">開關控制
-                                <input type="checkbox" v-model="user.function2">時間控制
-                                <input type="checkbox" v-model="user.function3">權限控制
+                            <td><input type="text" v-model="editingUser.name" readonly class="readonly-input"></td>
+                            <td v-if="hasPermission"><input type="text" v-model="editingUser.username" readonly
+                                    class="readonly-input"></td>
+                            <td v-if="hasPermission"><input type="password" v-model="editingUser.password"></td>
+                            <td v-if="hasPermission">
+                                <input type="checkbox" v-model="editingUser.function1">開關控制
+                                <input type="checkbox" v-model="editingUser.function2">時間控制
+                                <input type="checkbox" v-model="editingUser.function3">權限控制
                             </td>
                             <td>
                                 <button @click="saveUser(index)">保存</button>
@@ -82,7 +74,6 @@
                         </template>
                     </tr>
                 </tbody>
-
             </table>
         </div>
     </div>
@@ -92,91 +83,111 @@
 export default {
     data() {
         return {
-            showForm: false,  // 表單顯示狀態
-            formData: {
-                name: '',  // 表單資料中的姓名
-                username: '',  // 表單資料中的帳號
-                password: '',  // 表單資料中的密碼
-                function1: false,  // 表單資料中的功能限制1
-                function2: false,  // 表單資料中的功能限制2
-                function3: false,  // 表單資料中的功能限制3
-                id: null  // 表單資料中的用戶 ID
+            showForm: false,
+            newUser: {
+                name: '',
+                username: '',
+                password: '',
+                function1: false,
+                function2: false,
+                function3: false
             },
-            userList: [],  // 使用者清單
-            editingIndex: null, // 編輯中的索引
-            originalData: [] // 原始資料
+            editingUser: {
+                name: '',
+                username: '',
+                password: '',
+                function1: false,
+                function2: false,
+                function3: false,
+                id: null
+            },
+            userList: [],
+            editingIndex: null,
+            originalData: {},
+            hasPermission: false
         };
     },
-    // 在 mounted 鉤子中發送 HTTP GET 請求以檢索帳戶資料
     mounted() {
         this.loadUserData();
+        this.checkPermission();
     },
     methods: {
-        // 切換表單顯示狀態的方法
+        async checkPermission() {
+            try {
+                const response = await fetch('http://192.168.50.242/function3');
+                if (!response.ok) {
+                    throw new Error('網絡響應異常');
+                }
+                const data = await response.json();
+                this.hasPermission = data.function3 === 1;
+                if (!this.hasPermission) {
+                    const button = document.querySelector('.button');
+                    button.style.display = 'none';
+                }
+            } catch (error) {
+                console.error(`錯誤：${error}`);
+            }
+        },
+        hidePassword(password) {
+            return '*'.repeat(password.length);
+        },
         toggleForm() {
             this.showForm = !this.showForm;
+            this.resetNewUserForm();
         },
-        // 提交表单的方法
         submitForm() {
-            // 创建一个 FormData 对象
-            const formData = new FormData();
-            formData.append('name', this.formData.name);
-            formData.append('username', this.formData.username);
-            formData.append('password', this.formData.password);
-            formData.append('function1', this.formData.function1 ? 1 : 0);
-            formData.append('function2', this.formData.function2 ? 1 : 0);
-            formData.append('function3', this.formData.function3 ? 1 : 0);
+            const username = this.newUser.username;
+            const isDuplicateUsername = this.userList.some(user => user.username === username && user.id !== this.newUser.id);
 
-            // 檢查表單中是否有 id，如果有，则視為編輯操作
-            if (this.formData.id) {
-                // 發送 HTTP POST 請求到後端 /updatedata 端點
+            if (isDuplicateUsername) {
+                alert("已存在相同的使用者名稱，請選擇不同的帳號名稱。");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('name', this.newUser.name);
+            formData.append('username', this.newUser.username);
+            formData.append('password', this.newUser.password);
+            formData.append('function1', this.newUser.function1 ? 1 : 0);
+            formData.append('function2', this.newUser.function2 ? 1 : 0);
+            formData.append('function3', this.newUser.function3 ? 1 : 0);
+
+            if (this.newUser.id) {
+                formData.append('id', this.newUser.id);
+
                 fetch("http://192.168.50.242/updatedata", {
                     method: "POST",
-                    body: formData  // 使用 FormData 對象作為請求體
+                    body: formData
                 })
                     .then(response => {
-                        // 檢查響應狀態碼
                         if (response.ok) {
-                            // 如果響應狀態碼為 200，則表示成功
-                            console.log("用戶已成功更新");
-                            // 重置表單並隱藏
-                            this.resetForm();
+                            alert("用戶已成功更新");
+                            this.resetNewUserForm();
                             this.showForm = false;
-                            // 重新加載用戶數據
                             this.loadUserData();
                         } else {
-                            // 否則顯示錯誤消息
                             console.error("更新用戶時出現錯誤");
                         }
                     })
                     .catch(error => {
-                        // 捕獲任何可能的錯誤並顯示錯誤消息
                         console.error("發生錯誤：", error);
                     });
             } else {
-                // 如果沒有 id，則視為新增操作
-                // 發送 HTTP POST 請求到後端 /insertdata 端點
                 fetch("http://192.168.50.242/insertdata", {
                     method: "POST",
-                    body: formData  // 使用 FormData 對象作為請求體
+                    body: formData
                 })
                     .then(response => {
-                        // 檢查響應狀態碼
                         if (response.ok) {
-                            // 如果響應狀態碼為 200，則表示成功
-                            console.log("用戶已成功新增");
-                            // 重置表單並隱藏
-                            this.resetForm();
+                            alert("用戶已成功新增");
+                            this.resetNewUserForm();
                             this.showForm = false;
-                            // 重新加載用戶數據
                             this.loadUserData();
                         } else {
-                            // 否則顯示錯誤消息
                             console.error("新增用戶時出現錯誤");
                         }
                     })
                     .catch(error => {
-                        // 捕獲任何可能的錯誤並顯示錯誤消息
                         console.error("發生錯誤：", error);
                     });
             }
@@ -191,7 +202,6 @@ export default {
                     }
                 })
                 .then(data => {
-                    // 將從後端加載的資料中的 0 和 1 轉換為布林值
                     this.userList = data.map(user => ({
                         ...user,
                         function1: user.function1 === 1,
@@ -204,27 +214,19 @@ export default {
                 });
         },
         editUser(index) {
-            // 將選中的使用者資料複製到表單中
-            this.formData = { ...this.userList[index] };
-            // 檢查功能限制值
-            console.log("Function 1:", this.userList[index].function1);
-            console.log("Function 2:", this.userList[index].function2);
-            console.log("Function 3:", this.userList[index].function3);
-            // 複製一份原始資料，以便在取消編輯時恢復
-            this.originalData[index] = { ...this.userList[index] };
-            // 設置正在編輯的索引
+            this.editingUser = { ...this.userList[index] };
+            this.originalData = { ...this.userList[index] };
             this.editingIndex = index;
         },
         saveUser(index) {
-            const user = this.userList[index];
             const formData = new FormData();
-            formData.append('id', user.id);
-            formData.append('name', user.name);
-            formData.append('username', user.username);
-            formData.append('password', user.password);
-            formData.append('function1', user.function1 ? 1 : 0);
-            formData.append('function2', user.function2 ? 1 : 0);
-            formData.append('function3', user.function3 ? 1 : 0);
+            formData.append('id', this.editingUser.id);
+            formData.append('name', this.editingUser.name);
+            formData.append('username', this.editingUser.username);
+            formData.append('password', this.editingUser.password);
+            formData.append('function1', this.editingUser.function1 ? 1 : 0);
+            formData.append('function2', this.editingUser.function2 ? 1 : 0);
+            formData.append('function3', this.editingUser.function3 ? 1 : 0);
 
             fetch("http://192.168.50.242/updatedata", {
                 method: "POST",
@@ -232,39 +234,32 @@ export default {
             })
                 .then(response => {
                     if (response.ok) {
-                        console.log("用户已成功更新");
-                        this.editingIndex = null; // 保存後取消編輯狀態
-                        this.loadUserData(); // 重新加載用戶數據
+                        alert("用戶已成功更新");
+                        this.resetEditForm();
+                        this.loadUserData();
                     } else {
-                        console.error("更新用户时出现错误");
+                        console.error("更新用戶時出現錯誤");
                     }
                 })
                 .catch(error => {
                     console.error("發生錯誤：", error);
                 });
         },
-
-        cancelEdit(index) {
-            // 取消編輯，還原原始資料
-            this.userList[index] = { ...this.originalData[index] };
-            this.editingIndex = null;
+        cancelEdit() {
+            this.resetEditForm();
         },
-
-        // 刪除用戶的方法
         deleteUser(index) {
             const usernameToDelete = this.userList[index].username;
             const formData = new FormData();
             formData.append("username", usernameToDelete);
 
-            // 發送 HTTP POST 請求到後端 /deletedata 端點
             fetch("http://192.168.50.242/deletedata", {
                 method: "POST",
                 body: formData
             })
                 .then(response => {
                     if (response.ok) {
-                        console.log("用戶已成功刪除");
-                        // 刪除成功後重新加載用戶列表數據以更新表單
+                        alert("用戶已成功刪除");
                         this.loadUserData();
                     } else {
                         console.error("刪除用戶時出現錯誤");
@@ -274,9 +269,18 @@ export default {
                     console.error("發生錯誤：", error);
                 });
         },
-        // 重置表單的方法
-        resetForm() {
-            this.formData = {
+        resetNewUserForm() {
+            this.newUser = {
+                name: '',
+                username: '',
+                password: '',
+                function1: false,
+                function2: false,
+                function3: false
+            };
+        },
+        resetEditForm() {
+            this.editingUser = {
                 name: '',
                 username: '',
                 password: '',
@@ -397,5 +401,11 @@ td {
 
 th {
     background-color: #ecf2f8;
+}
+
+.readonly-input {
+    background-color: #befd9e;
+    /* 設置背景顏色為灰色 */
+
 }
 </style>
