@@ -1,13 +1,13 @@
 <template>
     <div class="led">
-        <!-- 為每個 URL 渲染一個開關容器 -->
+        <!-- 为每个 URL 渲染一个开关容器 -->
         <div class="switch-container" v-for="(url, index) in urls" :key="index">
             <label :name="'switch' + (index + 1)">
-                <!-- 創建一個開關勾選框並將其綁定到 switches 陣列 -->
+                <!-- 创建一个开关勾选框并将其绑定到 switches 数组 -->
                 <input type="checkbox" class="l" v-model="switches[index]" @change="updateSwitch(index)"
                     :disabled="!hasPermission">
             </label>
-            <!-- 顯示開關的狀態 -->
+            <!-- 显示开关的状态 -->
             <span class="status">{{ switches[index] ? (labels[index] + '走道On') : (labels[index] + '走道Off') }}</span>
         </div>
     </div>
@@ -17,60 +17,49 @@
 export default {
     data() {
         return {
-            // 用于存储每个开关的状态（开/关）
-            switches: [false, false, false],
-            // 每个开关与 ESP8266 交互的 URL
-            urls: ['http://192.168.50.242/gpio3', 'http://192.168.50.242/gpio5', 'http://192.168.50.242/gpio7'],
-            // 每个开关的标签
-            labels: ['第一排', '第二排', '第三排'],
-            // 存储每个开关的 AbortController
-            controllers: [],
-            // 用于存储每个开关的定时器 ID
-            intervals: [],
-            // 存储 function1 的值
-            function1: null,
-            // 存储是否有权限的状态
-            hasPermission: false,
+            switches: [false, false, false], // 用于存储每个开关的状态（开/关）
+            urls: ['http://192.168.50.242/gpio3', 'http://192.168.50.242/gpio5', 'http://192.168.50.242/gpio7'], // 每个开关与 ESP8266 交互的 URL
+            labels: ['第一排', '第二排', '第三排'], // 每个开关的标签
+            controllers: [], // 存储每个开关的 AbortController
+            intervals: [], // 用于存储每个开关的定时器 ID
+            function1: null, // 存储 function1 的值
+            hasPermission: false, // 存储是否有权限的状态
+            userName: '', // 存储当前登录的用户名
+            ipAddress: '192.168.50.1' // 假设IP地址已知并在此处存储
         };
     },
     methods: {
         async updateSwitch(index) {
-            // 检查用户是否具有执行操作的权限（仅当 function1 的值为 1 时才允许操作）
             if (this.hasPermission) {
-                // 获取开关的当前状态
                 const isChecked = this.switches[index];
-                // 确定发送到 ESP8266 的状态（开/关）
                 const state = isChecked ? 'on' : 'off';
-                // 构建带有引脚和状态参数的 URL
                 const updateUrl = `http://192.168.50.242/gpio?pin=${index * 2 + 3}&state=${state}`;
                 try {
-                    // 发送请求更新开关状态
                     const controller = new AbortController();
                     this.controllers[index] = controller;
                     const response = await fetch(updateUrl, { signal: controller.signal });
                     if (!response.ok) {
                         throw new Error('网络响应异常');
                     }
+
+                    // 记录日志
+                    await this.logAction('電源開關', this.userName, this.getTaiwanISOTime(), this.labels[index] + state, this.ipAddress);
                 } catch (error) {
                     console.error(`错误：${error}`);
                 }
             } else {
-                // 没有权限，直接跳出提示框
                 alert('您没有权限执行此操作！');
             }
         },
         async updateStatus(index) {
             try {
-                // 发送请求获取开关的当前状态
                 const controller = new AbortController();
                 this.controllers[index] = controller;
                 const response = await fetch(this.urls[index], { signal: controller.signal });
                 if (!response.ok) {
                     throw new Error('网络响应异常');
                 }
-                // 解析响应以获取状态数据
                 const data = await response.json();
-                // 根据响应更新开关状态
                 this.switches[index] = data.state === 'on';
             } catch (error) {
                 console.error(`错误：${error}`);
@@ -84,11 +73,8 @@ export default {
                 }
                 const data = await response.json();
                 const newFunction1Value = data.function1;
-                // 将新的 function1 值更新到组件的状态中
                 this.function1 = newFunction1Value;
-                // 更新权限状态
                 this.hasPermission = this.function1 === 1;
-                // 如果没有权限，直接跳出
                 if (!this.hasPermission) {
                     alert('您没有权限执行此操作！');
                     throw new Error('没有权限');
@@ -97,15 +83,69 @@ export default {
                 console.error(`错误：${error}`);
             }
         },
+        async fetchUserInfo() {
+            try {
+                const response = await fetch('http://192.168.50.242/get_user_info');
+                if (!response.ok) {
+                    throw new Error('网络响应异常');
+                }
+                const data = await response.json();
+                this.userName = data.name;
+            } catch (error) {
+                console.error(`获取用户信息错误：${error}`);
+            }
+        },
+        async logAction(functionName, username, date, action, ip) {
+            try {
+                const response = await fetch('http://192.168.50.242/logs', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        function: functionName,
+                        username: username,
+                        date: date,
+                        action: JSON.stringify(action),
+                        ip: ip
+                    })
+                });
+                if (!response.ok) {
+                    throw new Error('日志记录失败');
+                }
+                console.log('日志记录成功');
+            } catch (error) {
+                console.error(`日志记录错误：${error}`);
+            }
+        },
+        getTaiwanISOTime() {
+            const currentTime = new Date();
+            const options = {
+                timeZone: 'Asia/Taipei',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            };
+
+            // 使用toLocaleString获取台湾时间字符串
+            const [date, time] = currentTime.toLocaleString('en-GB', options).split(', ');
+            const [day, month, year] = date.split('/');
+            const taiwanTime = `${year}-${month}-${day},${time}`;
+
+            // 返回ISO 8601格式的字符串
+            return taiwanTime;
+        }
     },
     async mounted() {
-        // 检查用户权限
         await this.checkPermission();
+        await this.fetchUserInfo(); // 获取用户信息
 
-        // 组件挂载时更新每个开关的状态
         this.urls.forEach((url, index) => {
             this.updateStatus(index);
-            // 设置间隔定期更新开关状态
             const intervalId = setInterval(() => {
                 this.updateStatus(index);
             }, 1000);
@@ -113,18 +153,15 @@ export default {
         });
     },
     beforeUnmount() {
-        // 组件卸载时取消所有请求
         this.controllers.forEach(controller => {
             if (controller) {
                 controller.abort();
             }
         });
-        // 清除定时器
         this.intervals.forEach(interval => clearInterval(interval));
     }
 };
 </script>
-
 
 <style scoped>
 .switch-container .status {

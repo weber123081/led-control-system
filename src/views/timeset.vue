@@ -58,7 +58,9 @@ export default {
             // 存储定时器 ID
             intervalId: null,
             // 存储是否有权限的状态
-            hasPermission: false
+            hasPermission: false,
+            userName: '', // 存储当前登录的用户名
+            ipAddress: '192.168.50.1' // 假设IP地址已知并在此处存储
         };
     },
     mounted() {
@@ -67,6 +69,7 @@ export default {
         this.intervalId = setInterval(this.getTimeFromESP8266, 1000);
         // 检查用户权限
         this.checkPermission();
+        this.fetchUserInfo();
     },
     methods: {
         // 從 ESP8266 獲取時間
@@ -107,10 +110,35 @@ export default {
                 .then(response => response.text())
                 .then(text => {
                     alert("设置成功");
+                    // 在设置成功后记录日志
+                    this.logAction('時間設定', this.userName, this.getTaiwanISOTime(), '更新時間設定', this.ipAddress);
                 })
                 .catch(error => {
                     console.error(error);
                 });
+        },
+        async logAction(functionName, username, date, action, ip) {
+            try {
+                const response = await fetch('http://192.168.50.242/logs', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        function: functionName,
+                        username: username,
+                        date: date,
+                        action: JSON.stringify(action),
+                        ip: ip
+                    })
+                });
+                if (!response.ok) {
+                    throw new Error('日志记录失败');
+                }
+                console.log('日志记录成功');
+            } catch (error) {
+                console.error(`日志记录错误：${error}`);
+            }
         },
         // 將表單數據保存到本地存儲
         saveFormData() {
@@ -146,6 +174,39 @@ export default {
                 console.error(`錯誤：${error}`);
             }
         },
+        getTaiwanISOTime() {
+            const currentTime = new Date();
+            const options = {
+                timeZone: 'Asia/Taipei',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            };
+
+            // 使用toLocaleString获取台湾时间字符串
+            const [date, time] = currentTime.toLocaleString('en-GB', options).split(', ');
+            const [day, month, year] = date.split('/');
+            const taiwanTime = `${year}-${month}-${day},${time}`;
+
+            // 返回ISO 8601格式的字符串
+            return taiwanTime;
+        },
+        async fetchUserInfo() {
+            try {
+                const response = await fetch('http://192.168.50.242/get_user_info');
+                if (!response.ok) {
+                    throw new Error('网络响应异常');
+                }
+                const data = await response.json();
+                this.userName = data.name;
+            } catch (error) {
+                console.error(`获取用户信息错误：${error}`);
+            }
+        }
     },
     beforeUnmount() {
         // 清除定时器
@@ -153,8 +214,6 @@ export default {
     }
 };
 </script>
-
-
 
 <style scoped>
 .aisle1,

@@ -1,60 +1,62 @@
 <template>
     <div class="content" id="content">
         <div class="background">
-            <DataTable id="example" class="display" :columns="columns" style="width: 100%">
+            <DataTable :columns="columns" :data="logs" class="table table-hover table-striped" style="width: 100%">
                 <thead>
                     <tr>
                         <th>使用功能名稱</th>
-                        <th>使用者員工編號</th>
+                        <th>操作者</th>
                         <th>操作時間</th>
                         <th>操作動作</th>
                         <th>設備MAC</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>功能1</td>
-                        <td>001</td>
-                        <td>2024-04-01 09:30:00</td>
-                        <td>操作1</td>
-                        <td>00:11:22:33:44:55</td>
-                    </tr>
-                    <tr>
-                        <td>功能2</td>
-                        <td>002</td>
-                        <td>2024-04-01 10:00:00</td>
-                        <td>操作2</td>
-                        <td>AA:BB:CC:DD:EE:FF</td>
-                    </tr>
-                    <tr>
-                        <td>功能3</td>
-                        <td>003</td>
-                        <td>2024-04-01 10:30:00</td>
-                        <td>操作3</td>
-                        <td>11:22:33:44:55:66</td>
-                    </tr>
-                </tbody>
             </DataTable>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
 import DataTable from 'datatables.net-vue3';
 import DataTablesCore from 'datatables.net-bs5';
 
 DataTable.use(DataTablesCore);
 
 const columns = [
-    { data: '使用功能名稱' },
-    { data: '使用者員工編號' },
-    { data: '操作時間' },
-    { data: '操作動作' },
-    { data: '設備MAC' },
+    { title: '使用功能名稱', data: 'function' },
+    { title: '操作者', data: 'username' },
+    { title: '操作時間', data: 'date' },
+    { title: '操作動作', data: 'action' },
+    { title: '設備MAC', data: 'ip' }
 ];
+
+const logs = ref([]);
+
+onMounted(async () => {
+    try {
+        const response = await fetch('http://192.168.50.242/logs', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        if (!response.ok) {
+            throw new Error('Failed to fetch logs');
+        }
+        const data = await response.json();
+        logs.value = data;
+    } catch (error) {
+        console.error('Error fetching logs:', error);
+    }
+});
 </script>
 
+
 <style scoped>
+@import 'bootstrap';
+@import 'datatables.net-bs5';
+
 @viewport {
     width: device-width;
     zoom: 1.0;
