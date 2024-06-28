@@ -65,7 +65,7 @@ export default {
     },
     mounted() {
         this.getTimeFromESP8266();
-        this.loadFormData(); // 在组件挂载时加载表单数据
+        this.getFormDataFromServer(); // 在组件挂载时加载表单数据
         this.intervalId = setInterval(this.getTimeFromESP8266, 1000);
         // 检查用户权限
         this.checkPermission();
@@ -88,7 +88,6 @@ export default {
         updateFormParams(event) {
             const input = event.target;
             this.formData[input.name] = input.value;
-            this.saveFormData(); // 更新表單數據後保存到本地存儲
         },
         // 提交表單
         submitForm() {
@@ -112,6 +111,8 @@ export default {
                     alert("设置成功");
                     // 在设置成功后记录日志
                     this.logAction('時間設定', this.userName, this.getTaiwanISOTime(), '更新時間設定', this.ipAddress);
+                    // 在成功提交表单后从服务器重新加载表单数据
+                    this.getFormDataFromServer();
                 })
                 .catch(error => {
                     console.error(error);
@@ -128,7 +129,7 @@ export default {
                         function: functionName,
                         username: username,
                         date: date,
-                        action: JSON.stringify(action),
+                        action: action,
                         ip: ip
                     })
                 });
@@ -140,19 +141,24 @@ export default {
                 console.error(`日志记录错误：${error}`);
             }
         },
-        // 將表單數據保存到本地存儲
-        saveFormData() {
-            localStorage.setItem('formData', JSON.stringify(this.formData));
-        },
-        // 從本地存儲載入表單數據
-        loadFormData() {
-            const formDataStr = localStorage.getItem('formData');
-            if (formDataStr) {
-                this.formData = JSON.parse(formDataStr);
+        // 从服务器获取表单数据
+        async getFormDataFromServer() {
+            try {
+                const response = await fetch('http://192.168.50.242/get_timeset');
+                if (!response.ok) {
+                    throw new Error('获取表单数据失败');
+                }
+                const formDataJson = await response.json();
+
+                // 更新 formData 对象
+                this.formData = formDataJson;
+
                 // 更新表單中的輸入框值
                 for (let i = 1; i <= 6; i++) {
                     document.getElementById(`time${i}`).value = this.formData[`time${i}`];
                 }
+            } catch (error) {
+                console.error(`获取表单数据错误：${error}`);
             }
         },
         // 檢查使用者權限
@@ -214,6 +220,7 @@ export default {
     }
 };
 </script>
+
 
 <style scoped>
 .aisle1,

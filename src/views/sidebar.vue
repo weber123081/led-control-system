@@ -133,16 +133,16 @@ export default {
             .then(data => {
                 const userInfoElem = document.getElementById('user-info');
                 if (data.loggedIn) {
-                    // 如果用戶已登入
                     this.loggedIn = true;
                     this.name = data.name;
                     userInfoElem.textContent = '登入人員: ' + data.name;
                     document.getElementById('logout-btn').style.display = 'inline';
                 } else {
-                    // 如果用戶未登入
                     this.loggedIn = false;
                     userInfoElem.textContent = '未登入';
                     document.getElementById('logout-btn').style.display = 'none';
+                    // 強制跳轉到登入畫面
+                    window.location.href = '/login';
                 }
             })
             .catch(error => {
@@ -155,9 +155,12 @@ export default {
 
         // 開始記錄用戶活動時間
         const startActivityTimer = () => {
-            userIsActive = true; // 用戶活動狀態為true
-            clearTimeout(activityTimer); // 清除之前的計時器
-            activityTimer = setTimeout(this.performLogoutAndRedirect, inactivityTimeout);
+            userIsActive = true;
+            clearTimeout(activityTimer);
+            activityTimer = setTimeout(() => {
+                this.logout(); // 自動登出
+                window.location.href = '/login'; // 自動跳轉到登入頁面
+            }, inactivityTimeout);
         };
 
         // 監測用戶的活動

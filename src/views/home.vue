@@ -106,7 +106,7 @@ export default {
                         function: functionName,
                         username: username,
                         date: date,
-                        action: JSON.stringify(action),
+                        action: action,
                         ip: ip
                     })
                 });

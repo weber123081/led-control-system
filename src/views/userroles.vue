@@ -104,12 +104,16 @@ export default {
             userList: [],
             editingIndex: null,
             originalData: {},
-            hasPermission: false
+            function3: null,
+            hasPermission: false,
+            userName: '',
+            ipAddress: '192.168.50.1'
         };
     },
     mounted() {
         this.loadUserData();
         this.checkPermission();
+        this.fetchUserInfo(); // 確保在組件加載時調用 fetchUserInfo 方法
     },
     methods: {
         async checkPermission() {
@@ -128,6 +132,70 @@ export default {
                 console.error(`錯誤：${error}`);
             }
         },
+        async fetchUserInfo() {
+            try {
+                const response = await fetch('http://192.168.50.242/get_user_info');
+                if (!response.ok) {
+                    throw new Error('网络响应异常');
+                }
+                const data = await response.json();
+                this.userName = data.name;
+            } catch (error) {
+                console.error(`获取用户信息错误：${error}`);
+            }
+        },
+        async logAction(functionName, username, date, action, ip) {
+            try {
+                const response = await fetch('http://192.168.50.242/logs', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        function: functionName,
+                        username: username,
+                        date: date,
+                        action: action,
+                        ip: ip
+                    })
+                });
+                if (!response.ok) {
+                    throw new Error('日志记录失败');
+                }
+                console.log('日志记录成功');
+            } catch (error) {
+                console.error(`日志记录错误：${error}`);
+            }
+        },
+        getTaiwanISOTime() {
+            const currentTime = new Date();
+            const options = {
+                timeZone: 'Asia/Taipei',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            };
+
+            // 使用toLocaleString获取台湾时间字符串
+            const [date, time] = currentTime.toLocaleString('en-GB', options).split(', ');
+            const [day, month, year] = date.split('/');
+            const taiwanTime = `${year}-${month}-${day},${time}`;
+
+            // 返回ISO 8601格式的字符串
+            return taiwanTime;
+        },
+        beforeUnmount() {
+            this.controllers.forEach(controller => {
+                if (controller) {
+                    controller.abort();
+                }
+            });
+            this.intervals.forEach(interval => clearInterval(interval));
+        },
         hidePassword(password) {
             return '*'.repeat(password.length);
         },
@@ -135,7 +203,7 @@ export default {
             this.showForm = !this.showForm;
             this.resetNewUserForm();
         },
-        submitForm() {
+        async submitForm() {
             const username = this.newUser.username;
             const isDuplicateUsername = this.userList.some(user => user.username === username && user.id !== this.newUser.id);
 
@@ -155,41 +223,41 @@ export default {
             if (this.newUser.id) {
                 formData.append('id', this.newUser.id);
 
-                fetch("http://192.168.50.242/updatedata", {
-                    method: "POST",
-                    body: formData
-                })
-                    .then(response => {
-                        if (response.ok) {
-                            alert("用戶已成功更新");
-                            this.resetNewUserForm();
-                            this.showForm = false;
-                            this.loadUserData();
-                        } else {
-                            console.error("更新用戶時出現錯誤");
-                        }
-                    })
-                    .catch(error => {
-                        console.error("發生錯誤：", error);
+                try {
+                    const response = await fetch("http://192.168.50.242/updatedata", {
+                        method: "POST",
+                        body: formData
                     });
+                    if (response.ok) {
+                        alert("用戶已成功更新");
+                        await this.logAction("帳號權限", this.userName, this.getTaiwanISOTime(), `修改用戶 ${this.newUser.username}（開關控制：${this.getFunctionName(this.newUser.function1)}，時間控制：${this.getFunctionName(this.newUser.function2)}，權限控制：${this.getFunctionName(this.newUser.function3)}）`, this.ipAddress);
+                        this.resetNewUserForm();
+                        this.showForm = false;
+                        this.loadUserData();
+                    } else {
+                        console.error("更新用戶時出現錯誤");
+                    }
+                } catch (error) {
+                    console.error("發生錯誤：", error);
+                }
             } else {
-                fetch("http://192.168.50.242/insertdata", {
-                    method: "POST",
-                    body: formData
-                })
-                    .then(response => {
-                        if (response.ok) {
-                            alert("用戶已成功新增");
-                            this.resetNewUserForm();
-                            this.showForm = false;
-                            this.loadUserData();
-                        } else {
-                            console.error("新增用戶時出現錯誤");
-                        }
-                    })
-                    .catch(error => {
-                        console.error("發生錯誤：", error);
+                try {
+                    const response = await fetch("http://192.168.50.242/insertdata", {
+                        method: "POST",
+                        body: formData
                     });
+                    if (response.ok) {
+                        alert("用戶已成功新增");
+                        await this.logAction("帳號權限", this.userName, this.getTaiwanISOTime(), `新增用戶 ${this.newUser.username}（開關控制：${this.getFunctionName(this.newUser.function1)}，時間控制：${this.getFunctionName(this.newUser.function2)}，權限控制：${this.getFunctionName(this.newUser.function3)}）`, this.ipAddress);
+                        this.resetNewUserForm();
+                        this.showForm = false;
+                        this.loadUserData();
+                    } else {
+                        console.error("新增用戶時出現錯誤");
+                    }
+                } catch (error) {
+                    console.error("發生錯誤：", error);
+                }
             }
         },
         loadUserData() {
@@ -218,7 +286,7 @@ export default {
             this.originalData = { ...this.userList[index] };
             this.editingIndex = index;
         },
-        saveUser(index) {
+        async saveUser(index) {
             const formData = new FormData();
             formData.append('id', this.editingUser.id);
             formData.append('name', this.editingUser.name);
@@ -228,46 +296,46 @@ export default {
             formData.append('function2', this.editingUser.function2 ? 1 : 0);
             formData.append('function3', this.editingUser.function3 ? 1 : 0);
 
-            fetch("http://192.168.50.242/updatedata", {
-                method: "POST",
-                body: formData
-            })
-                .then(response => {
-                    if (response.ok) {
-                        alert("用戶已成功更新");
-                        this.resetEditForm();
-                        this.loadUserData();
-                    } else {
-                        console.error("更新用戶時出現錯誤");
-                    }
-                })
-                .catch(error => {
-                    console.error("發生錯誤：", error);
+            try {
+                const response = await fetch("http://192.168.50.242/updatedata", {
+                    method: "POST",
+                    body: formData
                 });
+                if (response.ok) {
+                    alert("用戶已成功更新");
+                    await this.logAction("帳號權限", this.userName, this.getTaiwanISOTime(), `修改用戶 ${this.editingUser.username}（開關控制：${this.getFunctionName(this.editingUser.function1)}，時間控制：${this.getFunctionName(this.editingUser.function2)}，權限控制：${this.getFunctionName(this.editingUser.function3)}）`, this.ipAddress);
+                    this.resetEditForm();
+                    this.loadUserData();
+                } else {
+                    console.error("更新用戶時出現錯誤");
+                }
+            } catch (error) {
+                console.error("發生錯誤：", error);
+            }
         },
         cancelEdit() {
             this.resetEditForm();
         },
-        deleteUser(index) {
+        async deleteUser(index) {
             const usernameToDelete = this.userList[index].username;
             const formData = new FormData();
             formData.append("username", usernameToDelete);
 
-            fetch("http://192.168.50.242/deletedata", {
-                method: "POST",
-                body: formData
-            })
-                .then(response => {
-                    if (response.ok) {
-                        alert("用戶已成功刪除");
-                        this.loadUserData();
-                    } else {
-                        console.error("刪除用戶時出現錯誤");
-                    }
-                })
-                .catch(error => {
-                    console.error("發生錯誤：", error);
+            try {
+                const response = await fetch("http://192.168.50.242/deletedata", {
+                    method: "POST",
+                    body: formData
                 });
+                if (response.ok) {
+                    alert("用戶已成功刪除");
+                    await this.logAction("帳號權限", this.userName, this.getTaiwanISOTime(), `刪除用戶 ${usernameToDelete}`, this.ipAddress);
+                    this.loadUserData();
+                } else {
+                    console.error("刪除用戶時出現錯誤");
+                }
+            } catch (error) {
+                console.error("發生錯誤：", error);
+            }
         },
         resetNewUserForm() {
             this.newUser = {
@@ -290,6 +358,16 @@ export default {
                 id: null
             };
             this.editingIndex = null;
+        },
+        functions() {
+            const functions = [];
+            if (this.newUser.function1) functions.push("開關控制");
+            if (this.newUser.function2) functions.push("時間控制");
+            if (this.newUser.function3) functions.push("權限控制");
+            return functions.join(", ");
+        },
+        getFunctionName(value) {
+            return value ? "啟用" : "禁用";
         }
     }
 };
