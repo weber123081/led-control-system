@@ -1,55 +1,37 @@
 <template>
-    <!-- 標頭 -->
     <div class="header">
         <h1>5F資訊智慧開關</h1>
     </div>
-    <!-- 用戶資訊 -->
     <div id="user-info"></div>
-    <!-- 登出按鈕 -->
     <button id="logout-btn" @click="logout">登出</button>
-    <!-- 使用者資訊組件 -->
     <UserInfo :loggedIn="loggedIn" :userName="name" />
-    <!-- 隱藏的按鈕區塊 -->
     <div class="none">
         <div class="input">
-            <!-- 帳號權限連結 -->
             <router-link to="/userroles">
                 <button class="value">
                     <iconroles />
-                    <a>
-                        帳號權限
-                    </a>
+                    <a>帳號權限</a>
                 </button>
             </router-link>
             <router-link to="/timeset">
-                <!-- 時間設定連結 -->
                 <button class="value">
                     <icontimeset />
-                    <a>
-                        時間設定
-                    </a>
+                    <a>時間設定</a>
                 </button>
             </router-link>
             <router-link to="/history">
-                <!-- 紀錄查詢連結 -->
                 <button class="value">
                     <iconhistory />
-                    <a>
-                        紀錄查詢
-                    </a>
+                    <a>紀錄查詢</a>
                 </button>
             </router-link>
             <router-link to="/home">
-                <!-- 回首頁連結 -->
                 <button class="value">
                     <iconhome />
-                    <a>
-                        回首頁
-                    </a>
+                    <a>回首頁</a>
                 </button>
             </router-link>
             <a href="/restart" @click.prevent="restartESP8266">
-                <!-- 重新開機按鈕 -->
                 <button class="value">
                     <iconreset />
                     重新開機
@@ -68,7 +50,6 @@ import iconreset from '../components/icons/iconreset.vue'
 </script>
 
 <script>
-// 直接在這裡聲明 `UserInfo` 組件
 const UserInfo = {
     props: ['loggedIn', 'userName'],
     template: `
@@ -87,41 +68,45 @@ export default {
         };
     },
     methods: {
-        // 重新開機方法
         restartESP8266() {
-            // 發送重新開機請求到 ESP8266
             fetch('http://192.168.50.242/restart')
                 .then(response => response.text())
                 .then(data => {
                     console.log(data);
-                    // 可以在這裡處理成功後的邏輯
                 })
                 .catch(error => {
                     console.error('錯誤：', error);
-                    // 可以在這裡處理錯誤的邏輯
                 });
         },
-        // 登出方法
         logout() {
-            // 向服务器发送登出请求
             fetch('http://192.168.50.242/logout', {
                 method: 'POST'
             })
                 .then(response => {
                     if (response.ok) {
-                        alert('已登出'); // 登出成功后显示警告消息
-                        window.location.href = '/login'; // 重定向到登录页面
+                        alert('已登出');
+                        window.location.href = '/login';
                     } else {
-                        throw new Error('登出失败');
+                        throw new Error('登出失敗');
                     }
                 })
                 .catch(error => {
-                    console.error('错误：', error);
+                    console.error('錯誤：', error);
                 });
+        },
+        checkInactivity() {
+            const lastActivity = localStorage.getItem('lastActivityTime');
+            if (lastActivity && Date.now() - parseInt(lastActivity) > 15 * 60 * 1000) { // 15分鐘
+                this.logout();
+                window.location.href = '/login';
+            }
+        },
+        resetActivityTimer() {
+            const currentTime = Date.now();
+            localStorage.setItem('lastActivityTime', currentTime);
         }
     },
     mounted() {
-        // 獲取用戶信息
         fetch('http://192.168.50.242/get_user_info')
             .then(response => {
                 if (response.ok) {
@@ -141,7 +126,6 @@ export default {
                     this.loggedIn = false;
                     userInfoElem.textContent = '未登入';
                     document.getElementById('logout-btn').style.display = 'none';
-                    // 強制跳轉到登入畫面
                     window.location.href = '/login';
                 }
             })
@@ -149,29 +133,20 @@ export default {
                 console.error(`錯誤：${error.message}`);
             });
 
-        var userIsActive = false; // 初始化用戶活動狀態為false
-        var inactivityTimeout = 15 * 60 * 1000; // 15分鐘（以毫秒為單位）
-        var activityTimer;
+        // 在頁面加載時檢查最後的活動時間
+        this.checkInactivity();
 
-        // 開始記錄用戶活動時間
-        const startActivityTimer = () => {
-            userIsActive = true;
-            clearTimeout(activityTimer);
-            activityTimer = setTimeout(() => {
-                this.logout(); // 自動登出
-                window.location.href = '/login'; // 自動跳轉到登入頁面
-            }, inactivityTimeout);
-        };
+        document.addEventListener('mousemove', this.resetActivityTimer);
+        document.addEventListener('keypress', this.resetActivityTimer);
 
-        // 監測用戶的活動
-        document.addEventListener('mousemove', startActivityTimer); // 鼠標移動事件
-        document.addEventListener('keypress', startActivityTimer); // 鍵盤按鍵事件
+        this.resetActivityTimer();
 
-        // 初始化啟動計時器
-        startActivityTimer();
+        // 每秒檢查一次用戶是否超時
+        setInterval(this.checkInactivity, 1000);
     }
 };
 </script>
+
 
 <style scoped>
 #user-info {

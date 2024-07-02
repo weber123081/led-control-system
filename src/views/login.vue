@@ -133,7 +133,7 @@ export default {
     font-size: 20px;
 }
 
-/* 设置背景图片的URL */
+/* 設定背景圖的URL */
 .body {
     background-image: url(../assets/login.jpg);
     background-size: cover;

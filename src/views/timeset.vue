@@ -46,7 +46,7 @@
 export default {
     data() {
         return {
-            esp8266Time: '',  // 用来存储从 ESP8266 获取的时间
+            esp8266Time: '',  // 用於儲存來自 ESP8266 取得的時間
             formData: {
                 time1: '',
                 time2: '',
@@ -55,19 +55,19 @@ export default {
                 time5: '',
                 time6: ''
             },
-            // 存储定时器 ID
+            // 儲存定時器 ID
             intervalId: null,
-            // 存储是否有权限的状态
+            // 儲存是否有權限的狀態
             hasPermission: false,
-            userName: '', // 存储当前登录的用户名
-            ipAddress: '192.168.50.1' // 假设IP地址已知并在此处存储
+            userName: '', // 儲存目前登入的使用者名稱
+            ipAddress: '192.168.50.1' // 假設IP位址已知並在此處存儲
         };
     },
     mounted() {
         this.getTimeFromESP8266();
-        this.getFormDataFromServer(); // 在组件挂载时加载表单数据
+        this.getFormDataFromServer(); // 在元件掛載時載入表單數據
         this.intervalId = setInterval(this.getTimeFromESP8266, 1000);
-        // 检查用户权限
+        // 檢查使用者權限
         this.checkPermission();
         this.fetchUserInfo();
     },
@@ -91,9 +91,9 @@ export default {
         },
         // 提交表單
         submitForm() {
-            // 检查用户权限
+            // 檢查使用者權限
             if (!this.hasPermission) {
-                alert("您没有权限执行此操作！");
+                alert("您沒有權限執行此操作！");
                 return;
             }
 
@@ -108,10 +108,10 @@ export default {
             })
                 .then(response => response.text())
                 .then(text => {
-                    alert("设置成功");
-                    // 在设置成功后记录日志
+                    alert("設定成功");
+                    // 設定成功後記錄日誌
                     this.logAction('時間設定', this.userName, this.getTaiwanISOTime(), '更新時間設定', this.ipAddress);
-                    // 在成功提交表单后从服务器重新加载表单数据
+                    // 在成功提交表單後從伺服器重新載入表單數據
                     this.getFormDataFromServer();
                 })
                 .catch(error => {
@@ -134,23 +134,23 @@ export default {
                     })
                 });
                 if (!response.ok) {
-                    throw new Error('日志记录失败');
+                    throw new Error('記錄失敗');
                 }
-                console.log('日志记录成功');
+                console.log('記錄成功');
             } catch (error) {
-                console.error(`日志记录错误：${error}`);
+                console.error(`記錄錯誤：${error}`);
             }
         },
-        // 从服务器获取表单数据
+        // 從伺服器取得表單數據
         async getFormDataFromServer() {
             try {
                 const response = await fetch('http://192.168.50.242/get_timeset');
                 if (!response.ok) {
-                    throw new Error('获取表单数据失败');
+                    throw new Error('取得表單資料失敗');
                 }
                 const formDataJson = await response.json();
 
-                // 更新 formData 对象
+                // 更新 formData 物件
                 this.formData = formDataJson;
 
                 // 更新表單中的輸入框值
@@ -158,7 +158,7 @@ export default {
                     document.getElementById(`time${i}`).value = this.formData[`time${i}`];
                 }
             } catch (error) {
-                console.error(`获取表单数据错误：${error}`);
+                console.error(`取得表單資料錯誤：${error}`);
             }
         },
         // 檢查使用者權限
@@ -172,9 +172,9 @@ export default {
                 const newFunction2Value = data.function2;
                 // 更新權限狀態
                 this.hasPermission = newFunction2Value === 1;
-                // 如果没有权限，弹出警告
+                // 如果沒有權限，彈出警告
                 if (!this.hasPermission) {
-                    alert("您没有权限执行此操作！");
+                    alert("您沒有權限執行此操作！");
                 }
             } catch (error) {
                 console.error(`錯誤：${error}`);
@@ -193,29 +193,29 @@ export default {
                 hour12: false
             };
 
-            // 使用toLocaleString获取台湾时间字符串
+            // 使用toLocaleString取得台灣時間字串
             const [date, time] = currentTime.toLocaleString('en-GB', options).split(', ');
             const [day, month, year] = date.split('/');
             const taiwanTime = `${year}-${month}-${day},${time}`;
 
-            // 返回ISO 8601格式的字符串
+            // 傳回ISO 8601格式的字串
             return taiwanTime;
         },
         async fetchUserInfo() {
             try {
                 const response = await fetch('http://192.168.50.242/get_user_info');
                 if (!response.ok) {
-                    throw new Error('网络响应异常');
+                    throw new Error('網路回應異常');
                 }
                 const data = await response.json();
                 this.userName = data.name;
             } catch (error) {
-                console.error(`获取用户信息错误：${error}`);
+                console.error(`取得使用者資訊錯誤：${error}`);
             }
         }
     },
     beforeUnmount() {
-        // 清除定时器
+        // 清除定時器
         clearInterval(this.intervalId);
     }
 };

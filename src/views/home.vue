@@ -1,13 +1,13 @@
 <template>
     <div class="led">
-        <!-- 为每个 URL 渲染一个开关容器 -->
+        <!-- 為每個URL渲染一個開關容器 -->
         <div class="switch-container" v-for="(url, index) in urls" :key="index">
             <label :name="'switch' + (index + 1)">
-                <!-- 创建一个开关勾选框并将其绑定到 switches 数组 -->
+                <!-- 建立一個開關勾選框將其綁定到交換機 -->
                 <input type="checkbox" class="l" v-model="switches[index]" @change="updateSwitch(index)"
                     :disabled="!hasPermission">
             </label>
-            <!-- 显示开关的状态 -->
+            <!-- 顯示開關的狀態 -->
             <span class="status">{{ switches[index] ? (labels[index] + '走道On') : (labels[index] + '走道Off') }}</span>
         </div>
     </div>
@@ -17,15 +17,15 @@
 export default {
     data() {
         return {
-            switches: [false, false, false], // 用于存储每个开关的状态（开/关）
-            urls: ['http://192.168.50.242/gpio3', 'http://192.168.50.242/gpio5', 'http://192.168.50.242/gpio7'], // 每个开关与 ESP8266 交互的 URL
-            labels: ['第一排', '第二排', '第三排'], // 每个开关的标签
-            controllers: [], // 存储每个开关的 AbortController
-            intervals: [], // 用于存储每个开关的定时器 ID
-            function1: null, // 存储 function1 的值
-            hasPermission: false, // 存储是否有权限的状态
-            userName: '', // 存储当前登录的用户名
-            ipAddress: '192.168.50.1' // 假设IP地址已知并在此处存储
+            switches: [false, false, false], // 用於儲存每個開關的狀態（開/關）
+            urls: ['http://192.168.50.242/gpio3', 'http://192.168.50.242/gpio5', 'http://192.168.50.242/gpio7'], // 每個交換器與 lolin s2 mini 互動的 URL
+            labels: ['第一排', '第二排', '第三排'], // 每個開關的標籤
+            controllers: [], // 儲存每個開關的 AbortController
+            intervals: [], // 用於儲存交換器每個節點的ID
+            function1: null, // 儲存函數1的值
+            hasPermission: false, // 儲存是否有權限的狀態
+            userName: '', // 儲存目前登入的使用者名稱
+            ipAddress: '192.168.50.1' // 假設IP位址已知並在此處存儲
         };
     },
     methods: {
@@ -39,16 +39,16 @@ export default {
                     this.controllers[index] = controller;
                     const response = await fetch(updateUrl, { signal: controller.signal });
                     if (!response.ok) {
-                        throw new Error('网络响应异常');
+                        throw new Error('網路回應異常');
                     }
 
-                    // 记录日志
+                    // 記錄日誌
                     await this.logAction('電源開關', this.userName, this.getTaiwanISOTime(), this.labels[index] + state, this.ipAddress);
                 } catch (error) {
-                    console.error(`错误：${error}`);
+                    console.error(`錯誤：${error}`);
                 }
             } else {
-                alert('您没有权限执行此操作！');
+                alert('您沒有權限執行此操作！');
             }
         },
         async updateStatus(index) {
@@ -57,42 +57,42 @@ export default {
                 this.controllers[index] = controller;
                 const response = await fetch(this.urls[index], { signal: controller.signal });
                 if (!response.ok) {
-                    throw new Error('网络响应异常');
+                    throw new Error('網路回應異常');
                 }
                 const data = await response.json();
                 this.switches[index] = data.state === 'on';
             } catch (error) {
-                console.error(`错误：${error}`);
+                console.error(`錯誤：${error}`);
             }
         },
         async checkPermission() {
             try {
                 const response = await fetch('http://192.168.50.242/function1');
                 if (!response.ok) {
-                    throw new Error('网络响应异常');
+                    throw new Error('網路回應異常');
                 }
                 const data = await response.json();
                 const newFunction1Value = data.function1;
                 this.function1 = newFunction1Value;
                 this.hasPermission = this.function1 === 1;
                 if (!this.hasPermission) {
-                    alert('您没有权限执行此操作！');
-                    throw new Error('没有权限');
+                    alert('您沒有權限執行此操作！');
+                    throw new Error('沒有權限');
                 }
             } catch (error) {
-                console.error(`错误：${error}`);
+                console.error(`錯誤：${error}`);
             }
         },
         async fetchUserInfo() {
             try {
                 const response = await fetch('http://192.168.50.242/get_user_info');
                 if (!response.ok) {
-                    throw new Error('网络响应异常');
+                    throw new Error('網路回應異常');
                 }
                 const data = await response.json();
                 this.userName = data.name;
             } catch (error) {
-                console.error(`获取用户信息错误：${error}`);
+                console.error(`取得使用者資訊錯誤：${error}`);
             }
         },
         async logAction(functionName, username, date, action, ip) {
@@ -111,11 +111,11 @@ export default {
                     })
                 });
                 if (!response.ok) {
-                    throw new Error('日志记录失败');
+                    throw new Error('記錄失敗');
                 }
-                console.log('日志记录成功');
+                console.log('記錄成功');
             } catch (error) {
-                console.error(`日志记录错误：${error}`);
+                console.error(`記錄錯誤：${error}`);
             }
         },
         getTaiwanISOTime() {
@@ -131,18 +131,18 @@ export default {
                 hour12: false
             };
 
-            // 使用toLocaleString获取台湾时间字符串
+            // 使用toLocaleString取得台灣時間字串
             const [date, time] = currentTime.toLocaleString('en-GB', options).split(', ');
             const [day, month, year] = date.split('/');
             const taiwanTime = `${year}-${month}-${day},${time}`;
 
-            // 返回ISO 8601格式的字符串
+            //回傳ISO 8601格式的字串
             return taiwanTime;
         }
     },
     async mounted() {
         await this.checkPermission();
-        await this.fetchUserInfo(); // 获取用户信息
+        await this.fetchUserInfo(); // 獲取用戶資訊
 
         this.urls.forEach((url, index) => {
             this.updateStatus(index);
