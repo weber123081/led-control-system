@@ -85,7 +85,7 @@ export default {
                 .then(response => {
                     if (response.ok) {
                         alert('已登出');
-                        window.location.href = '/login';
+                        window.location.href = '/';
                     } else {
                         throw new Error('登出失敗');
                     }
