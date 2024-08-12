@@ -31,6 +31,12 @@
                     <a>回首頁</a>
                 </button>
             </router-link>
+            <router-link to="/note">
+                <button class="value">
+                    <iconNote />
+                    <a>便利貼</a>
+                </button>
+            </router-link>
             <a href="/restart" @click.prevent="restartESP8266">
                 <button class="value">
                     <iconreset />
@@ -47,6 +53,7 @@ import icontimeset from '../components/icons/icontimeset.vue'
 import iconhistory from '../components/icons/iconhistory.vue'
 import iconhome from '../components/icons/iconhome.vue'
 import iconreset from '../components/icons/iconreset.vue'
+import iconNote from '../components/icons/iconNote.vue'
 </script>
 
 <script>
@@ -217,6 +224,7 @@ export default {
     font-family: 'Stick', sans-serif;
     align-items: center;
     /* 垂直居中對齊 */
+    left: 10px;
 }
 
 /* 按鈕的樣式 */
