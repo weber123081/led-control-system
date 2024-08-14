@@ -118,7 +118,7 @@ export default {
     methods: {
         async checkPermission() {
             try {
-                const response = await fetch('http://192.168.50.242/function3');
+                const response = await fetch('/function3');
                 if (!response.ok) {
                     throw new Error('網絡響應異常');
                 }
@@ -134,7 +134,7 @@ export default {
         },
         async fetchUserInfo() {
             try {
-                const response = await fetch('http://192.168.50.242/get_user_info');
+                const response = await fetch('/get_user_info');
                 if (!response.ok) {
                     throw new Error('網路回應異常');
                 }
@@ -146,7 +146,7 @@ export default {
         },
         async logAction(functionName, username, date, action, ip) {
             try {
-                const response = await fetch('http://192.168.50.242/logs', {
+                const response = await fetch('/logs', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
@@ -224,7 +224,7 @@ export default {
                 formData.append('id', this.newUser.id);
 
                 try {
-                    const response = await fetch("http://192.168.50.242/updatedata", {
+                    const response = await fetch("/updatedata", {
                         method: "POST",
                         body: formData
                     });
@@ -242,7 +242,7 @@ export default {
                 }
             } else {
                 try {
-                    const response = await fetch("http://192.168.50.242/insertdata", {
+                    const response = await fetch("/insertdata", {
                         method: "POST",
                         body: formData
                     });
@@ -261,7 +261,7 @@ export default {
             }
         },
         loadUserData() {
-            fetch("http://192.168.50.242/access")
+            fetch("/access")
                 .then(response => {
                     if (response.ok) {
                         return response.json();
@@ -297,7 +297,7 @@ export default {
             formData.append('function3', this.editingUser.function3 ? 1 : 0);
 
             try {
-                const response = await fetch("http://192.168.50.242/updatedata", {
+                const response = await fetch("/updatedata", {
                     method: "POST",
                     body: formData
                 });
@@ -322,7 +322,7 @@ export default {
             formData.append("username", usernameToDelete);
 
             try {
-                const response = await fetch("http://192.168.50.242/deletedata", {
+                const response = await fetch("/deletedata", {
                     method: "POST",
                     body: formData
                 });
@@ -445,8 +445,7 @@ tfoot input {
     font-size: 16px;
     position: absolute;
     top: 55px;
-    left: 200px;
-    width: calc(100% - 200px);
+    width: 100%;
     height: calc(100% - 55px);
     background-color: #696969;
     color: #000000;

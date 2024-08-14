@@ -35,7 +35,7 @@ const logs = ref([]);
 
 onMounted(async () => {
     try {
-        const response = await fetch('http://192.168.50.242/logs', {
+        const response = await fetch('/logs', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json'
@@ -128,8 +128,7 @@ tfoot input {
     font-size: 16px;
     position: absolute;
     top: 55px;
-    left: 200px;
-    width: calc(100% - 220px);
+    width: 100%;
     height: calc(100% - 55px);
     background-color: #ffffff;
     color: #000000;

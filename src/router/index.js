@@ -19,6 +19,11 @@ const router = createRouter({
       component: () => import('../views/home.vue')
     },
     {
+      path: '/light',
+      name: 'light',
+      component: () => import('../views/light.vue')
+    },
+    {
       path: '/timeset',
       name: 'timeset',
       component: () => import('../views/timeset.vue')

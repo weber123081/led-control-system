@@ -75,16 +75,14 @@ export default {
         const router = useRouter();
 
         const login = async () => {
-            alert("登入成功");
-            router.push('/home');
-            return
+
 
             try {
                 const formData = new FormData();
                 formData.append('username', username.value);
                 formData.append('password', password.value);
 
-                const response = await fetch('http://192.168.50.242/login', {
+                const response = await fetch('/login', {
                     method: 'POST',
                     mode: 'cors',
                     body: formData,

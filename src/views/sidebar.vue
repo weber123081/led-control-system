@@ -1,59 +1,17 @@
 <template>
     <div class="header">
         <h1>5F資訊智慧開關</h1>
+        <router-link to="/home" class="home-button">
+            <iconhome class="home-icon" />
+        </router-link>
     </div>
     <div id="user-info"></div>
     <button id="logout-btn" @click="logout">登出</button>
     <UserInfo :loggedIn="loggedIn" :userName="name" />
-    <div class="none">
-        <div class="input">
-            <router-link to="/userroles">
-                <button class="value">
-                    <iconroles />
-                    <a>帳號權限</a>
-                </button>
-            </router-link>
-            <router-link to="/timeset">
-                <button class="value">
-                    <icontimeset />
-                    <a>時間設定</a>
-                </button>
-            </router-link>
-            <router-link to="/history">
-                <button class="value">
-                    <iconhistory />
-                    <a>紀錄查詢</a>
-                </button>
-            </router-link>
-            <router-link to="/home">
-                <button class="value">
-                    <iconhome />
-                    <a>回首頁</a>
-                </button>
-            </router-link>
-            <router-link to="/note">
-                <button class="value">
-                    <iconNote />
-                    <a>便利貼</a>
-                </button>
-            </router-link>
-            <a href="/restart" @click.prevent="restartESP8266">
-                <button class="value">
-                    <iconreset />
-                    重新開機
-                </button>
-            </a>
-        </div>
-    </div>
 </template>
 
 <script setup>
-import iconroles from '../components/icons/iconroles.vue'
-import icontimeset from '../components/icons/icontimeset.vue'
-import iconhistory from '../components/icons/iconhistory.vue'
-import iconhome from '../components/icons/iconhome.vue'
-import iconreset from '../components/icons/iconreset.vue'
-import iconNote from '../components/icons/iconNote.vue'
+import iconhome from '../components/icons/iconhome.vue';
 </script>
 
 <script>
@@ -76,7 +34,7 @@ export default {
     },
     methods: {
         restartESP8266() {
-            fetch('http://192.168.50.242/restart')
+            fetch('/restart')
                 .then(response => response.text())
                 .then(data => {
                     console.log(data);
@@ -86,7 +44,7 @@ export default {
                 });
         },
         logout() {
-            fetch('http://192.168.50.242/logout', {
+            fetch('/logout', {
                 method: 'POST'
             })
                 .then(response => {
@@ -114,7 +72,7 @@ export default {
         }
     },
     mounted() {
-        fetch('http://192.168.50.242/get_user_info')
+        fetch('/get_user_info')
             .then(response => {
                 if (response.ok) {
                     return response.json();
@@ -154,8 +112,45 @@ export default {
 };
 </script>
 
-
 <style scoped>
+/* 回首頁按鈕 */
+.home-button {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-family: 'Stick', sans-serif;
+    background-color: #808080;
+    color: #ffffff;
+    padding: 5px;
+    border-radius: 5px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 70px;
+    height: 30px;
+    cursor: pointer;
+}
+
+/* SVG 圖標的樣式 */
+.home-icon {
+    width: 20px;
+    /* 調整圖標大小 */
+    height: 20px;
+}
+
+/* 回首頁按鈕懸停和焦點樣式 */
+.home-button:not(:active):hover,
+.home-button:focus {
+    background-color: #21262C;
+}
+
+.home-button:focus,
+.home-button:active {
+    background-color: #1A1F24;
+    outline: none;
+}
+
 #user-info {
     position: fixed;
     top: 10px;
@@ -164,17 +159,14 @@ export default {
     padding: 1px;
     border-radius: 5px;
     font-family: 'Stick', sans-serif;
-
 }
 
 #logout-btn {
     position: fixed;
     top: 10px;
     right: 10px;
-    /* 負數值將按鈕上移 */
     font-family: 'Stick', sans-serif;
     background-color: #808080;
-    font-family: 'Stick', sans-serif;
 }
 
 /* 標頭樣式 */
@@ -189,99 +181,5 @@ export default {
     color: #ffffff;
 }
 
-/* 隱藏的區塊樣式 */
-.none {
-    height: 100vh;
-    background-color: #0D1117;
-    width: 200px;
-}
-
-/* 輸入區塊樣式 */
-.input {
-    display: flex;
-    flex-direction: column;
-    width: 200px;
-    height: 450px;
-    top: 90px;
-    position: absolute;
-    background-color: #0D1117;
-    justify-content: center;
-}
-
-/* 按鈕樣式 */
-.value {
-    background-color: transparent;
-    border: none;
-    padding: 0px;
-    margin-top: 50px;
-    color: white;
-    display: flex;
-    position: relative;
-    gap: 5px;
-    cursor: pointer;
-    border-radius: 4px;
-    font-size: 30px;
-    font-family: 'Stick', sans-serif;
-    align-items: center;
-    /* 垂直居中對齊 */
-    left: 10px;
-}
-
-/* 按鈕的樣式 */
-.value:not(:active):hover,
-.value:focus {
-    background-color: #21262C;
-}
-
-/* 按鈕的樣式 */
-.value:focus,
-.value:active {
-    background-color: #1A1F24;
-    outline: none;
-}
-
-/* 選中狀態下的擬元素 */
-.value::before {
-    content: "";
-    position: absolute;
-    top: 5px;
-    left: -10px;
-    width: 5px;
-    height: 80%;
-    background-color: #2F81F7;
-    border-radius: 5px;
-    opacity: 0;
-}
-
-/* 選中狀態下的擬元素 */
-.value:focus::before,
-.value:active::before {
-    opacity: 1;
-}
-
-/* SVG 圖標的大小 */
-.value svg {
-    width: 15px
-}
-
-/* 滑鼠懸停時的樣式 */
-.input:hover> :not(.value:hover) {
-    transition: 300ms;
-    filter: blur(1px);
-    transform: scale(0.95, 0.95);
-}
-
-/* 連結的顏色 */
-a {
-    color: #ffffff;
-    /* 將YourDesiredColor替換為您想要的顏色 */
-    text-decoration: none;
-    /* 可選：移除下劃線 */
-}
-
-/* 已訪問連結的顏色 */
-a:visited {
-    color: #ffffff;
-    /* 將YourVisitedColor替換為您想要的已訪問連結顏色 */
-}
+/* 其他樣式保持不變 */
 </style>

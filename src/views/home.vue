@@ -1,283 +1,93 @@
 <template>
     <div class="led">
-        <!-- 为每个URL渲染一个开关容器 -->
-        <div class="switch-container" v-for="(url, index) in urls" :key="index">
-            <label :name="'switch' + (index + 1)">
-                <!-- 创建一个开关勾选框并将其绑定到开关 -->
-                <input type="checkbox" class="l" v-model="switches[index]" @change="updateSwitch(index)"
-                    :disabled="!hasPermission" />
-            </label>
-            <!-- 显示开关的状态 -->
-            <span class="status">
-                {{ switches[index] ? (labels[index] + '走道On') : (labels[index] + '走道Off') }}
-            </span>
+        <div v-for="(button, index) in buttons" :key="index" class="button-container">
+            <router-link :to="button.route" class="led-button-link">
+                <button class="led-button">
+                    <img :src="button.imgSrc" alt="" class="button-image" />
+                    <span class="button-text">{{ button.name }}</span>
+                </button>
+            </router-link>
         </div>
     </div>
 </template>
+
 <script>
 export default {
     data() {
         return {
-            switches: [false, false, false], // 存储每个开关的状态（开/关）
-            urls: [
-                'http://192.168.50.242/gpio3',
-                'http://192.168.50.242/gpio5',
-                'http://192.168.50.242/gpio7'
-            ], // 每个交换器与 Lolin S2 Mini 互动的 URL
-            labels: ['第一排', '第二排', '第三排'], // 每个开关的标签
-            controllers: [], // 存储每个开关的 AbortController
-            intervals: [], // 用于存储每个交换器的定时器ID
-            function1: null, // 存储 function1 的值
-            hasPermission: false, // 存储是否有权限的状态
-            userName: '', // 存储当前登录的用户名
-            ipAddress: '192.168.50.1' // 假设 IP 地址已知并存储在此处
+            buttons: [
+                { name: '電燈開關', imgSrc: '/src/assets/light.png', route: '/light' },
+                { name: '時間設定', imgSrc: '/src/assets/time.png', route: '/timeset' },
+                { name: '紀錄查詢', imgSrc: '/src/assets/record.png', route: '/history' },
+                { name: '帳號設定', imgSrc: '/src/assets/account.png', route: '/userroles' }
+            ]
         };
-    },
-    methods: {
-        async updateSwitch(index) {
-            if (this.hasPermission) {
-                const isChecked = this.switches[index];
-                const state = isChecked ? 'on' : 'off';
-                const updateUrl = `http://192.168.50.242/gpio?pin=${index * 2 + 3}&state=${state}`;
-
-                try {
-                    const controller = new AbortController();
-                    this.controllers[index] = controller;
-                    const response = await fetch(updateUrl, { signal: controller.signal });
-
-                    if (!response.ok) {
-                        throw new Error('网络响应异常');
-                    }
-
-                    // 记录日志
-                    await this.logAction(
-                        '电源开关',
-                        this.userName,
-                        this.getTaiwanISOTime(),
-                        `${this.labels[index]}${state}`,
-                        this.ipAddress
-                    );
-                } catch (error) {
-                    console.error(`错误：${error}`);
-                }
-            } else {
-                alert('您没有权限执行此操作！');
-            }
-        },
-        async updateStatus(index) {
-            try {
-                const controller = new AbortController();
-                this.controllers[index] = controller;
-                const response = await fetch(this.urls[index], { signal: controller.signal });
-
-                if (!response.ok) {
-                    throw new Error('网络响应异常');
-                }
-
-                const data = await response.json();
-                this.switches[index] = data.state === 'on';
-            } catch (error) {
-                console.error(`错误：${error}`);
-            }
-        },
-        async checkPermission() {
-            try {
-                const response = await fetch('http://192.168.50.242/function1');
-                if (!response.ok) {
-                    throw new Error('网络响应异常');
-                }
-
-                const data = await response.json();
-                this.function1 = data.function1;
-                this.hasPermission = this.function1 === 1;
-
-                if (!this.hasPermission) {
-                    alert('您没有权限执行此操作！');
-                    throw new Error('没有权限');
-                }
-            } catch (error) {
-                console.error(`错误：${error}`);
-            }
-        },
-        async fetchUserInfo() {
-            try {
-                const response = await fetch('http://192.168.50.242/get_user_info');
-                if (!response.ok) {
-                    throw new Error('网络响应异常');
-                }
-
-                const data = await response.json();
-                this.userName = data.name;
-            } catch (error) {
-                console.error(`获取用户信息错误：${error}`);
-            }
-        },
-        async logAction(functionName, username, date, action, ip) {
-            try {
-                const response = await fetch('http://192.168.50.242/logs', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: new URLSearchParams({
-                        function: functionName,
-                        username: username,
-                        date: date,
-                        action: action,
-                        ip: ip
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error('记录失败');
-                }
-                console.log('记录成功');
-            } catch (error) {
-                console.error(`记录错误：${error}`);
-            }
-        },
-        getTaiwanISOTime() {
-            const currentTime = new Date();
-            const options = {
-                timeZone: 'Asia/Taipei',
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false
-            };
-
-            const [date, time] = currentTime.toLocaleString('en-GB', options).split(', ');
-            const [day, month, year] = date.split('/');
-            return `${year}-${month}-${day},${time}`;
-        }
-    },
-    async mounted() {
-        await this.checkPermission();
-        await this.fetchUserInfo();
-
-        this.urls.forEach((url, index) => {
-            this.updateStatus(index);
-            const intervalId = setInterval(() => {
-                this.updateStatus(index);
-            }, 1000);
-            this.intervals.push(intervalId);
-        });
-    },
-    beforeUnmount() {
-        this.controllers.forEach(controller => {
-            if (controller) {
-                controller.abort();
-            }
-        });
-        this.intervals.forEach(interval => clearInterval(interval));
     }
-};
+}
 </script>
+
 <style scoped>
-.switch-container .status {
-    font-size: 30px;
-    color: #000000;
-    font-family: 'Potta One', cursive;
-}
-
-.switch-container {
-    width: calc(33.33%);
-    align-items: flex-start;
-    margin-top: 30px;
-    margin-bottom: 5px;
-}
-
-/* 开关样式 */
-.l {
-    display: block;
-    margin-bottom: 1.5em;
-    font-size: 1em;
-    background-color: rgba(0, 0, 0, 0.7);
-    border-radius: 0.75em;
-    box-shadow: 0.125em 0.125em 0 0.125em rgba(0, 0, 0, 0.3) inset;
-    color: #fdea7b;
-    display: inline-flex;
-    align-items: center;
-    margin: auto;
-    padding: 0.15em;
-    width: 3em;
-    height: 1.5em;
-    transition: background-color 0.1s 0.3s ease-out, box-shadow 0.1s 0.3s ease-out;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-}
-
-/* 开关样式的伪元素 */
-.l:before,
-.l:after {
-    content: "";
-    display: block;
-}
-
-.l:before {
-    background-color: #d7d7d7;
-    border-radius: 50%;
-    width: 1.2em;
-    height: 1.2em;
-    transition: background-color 0.1s 0.3s ease-out, transform 0.3s ease-out;
-    z-index: 1;
-}
-
-.l:after {
-    background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.15) 0) 0 50% / 50% 100%,
-        repeating-linear-gradient(90deg, #bbb 0, #bbb, #bbb 20%, #999 20%, #999 40%) 0 50% / 50% 100%,
-        radial-gradient(circle at 50% 50%, #888 25%, transparent 26%);
-    background-repeat: no-repeat;
-    border: 0.25em solid transparent;
-    border-left: 0.4em solid #d8d8d8;
-    border-right: 0 solid transparent;
-    transition: border-left-color 0.1s 0.3s ease-out, transform 0.3s ease-out;
-    transform: translateX(-22.5%);
-    transform-origin: 25% 50%;
-    width: 1.2em;
-    height: 1em;
-    box-sizing: border-box;
-}
-
-/* 选中状态的开关样式 */
-.l:checked {
-    background-color: rgba(0, 0, 0, 0.45);
-    box-shadow: 0.125em 0.125em 0 0.125em rgba(0, 0, 0, 0.1) inset;
-}
-
-.l:checked:before {
-    background-color: currentColor;
-    transform: translateX(125%);
-}
-
-.l:checked:after {
-    border-left-color: currentColor;
-    transform: translateX(-2.5%) rotateY(180deg);
-}
-
-/* 移除焦点轮廓 */
-.l:focus {
-    outline: 0;
-}
-
 /* 主容器样式 */
 .led {
     display: flex;
-    flex-direction: row;
     justify-content: space-between;
+    align-items: center;
     text-align: center;
     font-family: 'Stick', sans-serif;
     font-size: 50px;
     position: absolute;
     top: 55px;
-    left: 200px;
-    width: calc(100% - 200px);
     height: calc(100% - 55px);
-    background-color: #696969;
+    width: 100%;
+    background-color: #A9A9A9;
     color: #ffffff;
+}
+
+/* 按钮容器样式 */
+.button-container {
+    width: 25%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* router-link 样式 */
+.led-button-link {
+    text-decoration: none;
+}
+
+/* 按钮样式 */
+.led-button {
+    width: 250px;
+    height: 300px;
+    font-size: 20px;
+    font-weight: bold;
+    background-color: #ffffff;
+    color: #313131;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* 图片样式 */
+.button-image {
+    width: 80%;
+    height: 200px;
+    margin-bottom: 10px;
+}
+
+/* 文字样式 */
+.button-text {
+    font-size: 20px;
+}
+
+.led-button:hover {
+    background-color: #fde8e8;
 }
 </style>

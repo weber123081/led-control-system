@@ -57,7 +57,7 @@ export default {
                 time6: ''
             },
             intervalId: null, // 用于存储定时器 ID
-            hasPermission: false, // 存储是否有权限的状态
+            hasPermission: true, // 存储是否有权限的状态
             userName: '', // 存储当前登录的用户名
             ipAddress: '192.168.50.1' // 假设IP地址已知并存储在此处
         };
@@ -72,7 +72,7 @@ export default {
     methods: {
         // 从 ESP8266 获取时间
         getTimeFromESP8266() {
-            fetch("http://192.168.50.242/time")
+            fetch("/time")
                 .then(response => response.text())
                 .then(data => {
                     this.esp8266Time = data;
@@ -96,7 +96,7 @@ export default {
 
             const formData = new URLSearchParams(this.formData).toString();
 
-            fetch('http://192.168.50.242/timeset', {
+            fetch('/timeset', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
@@ -115,7 +115,7 @@ export default {
         },
         async logAction(functionName, username, date, action, ip) {
             try {
-                const response = await fetch('http://192.168.50.242/logs', {
+                const response = await fetch('/logs', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
@@ -139,7 +139,7 @@ export default {
         // 从服务器获取表单数据
         async getFormDataFromServer() {
             try {
-                const response = await fetch('http://192.168.50.242/get_timeset');
+                const response = await fetch('/get_timeset');
                 if (!response.ok) {
                     throw new Error('取得表單資料失敗');
                 }
@@ -157,7 +157,7 @@ export default {
         // 检查用户权限
         async checkPermission() {
             try {
-                const response = await fetch('http://192.168.50.242/function2');
+                const response = await fetch('/function2');
                 if (!response.ok) {
                     throw new Error('網絡響應異常');
                 }
@@ -189,7 +189,7 @@ export default {
         },
         async fetchUserInfo() {
             try {
-                const response = await fetch('http://192.168.50.242/get_user_info');
+                const response = await fetch('/get_user_info');
                 if (!response.ok) {
                     throw new Error('网络响应异常');
                 }
@@ -291,8 +291,7 @@ h3 {
     font-size: 30px;
     position: absolute;
     top: 55px;
-    left: 200px;
-    width: calc(100% - 200px);
+    width: 100%;
     height: calc(100% - 55px);
     background-color: #696969;
     color: #fff;
