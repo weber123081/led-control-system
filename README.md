@@ -23,7 +23,7 @@
 1. 克隆專案
 
 ```bash
-git clone https://github.com/yourusername/led-control-system.git
+git clone https://github.com/weber123081/led-control-system.git
 cd led-control-system
 ```
 
@@ -59,8 +59,8 @@ npm run build
 
 ## 開發團隊
 
-- 前端開發：[Your Name]
-- 設計：[Your Name]
+- 前端開發：LED Control System Team
+- 設計：LED Control System Team
 
 ## 授權
 
