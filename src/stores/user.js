@@ -25,6 +25,11 @@ export const useUserStore = defineStore('user', {
             localStorage.removeItem('isAuthenticated')
             localStorage.removeItem('isAdmin')
             localStorage.removeItem('username')
+        },
+
+        setUserRole(role) {
+            this.isAdmin = role === 'admin'
+            localStorage.setItem('isAdmin', this.isAdmin.toString())
         }
     }
 }) 
