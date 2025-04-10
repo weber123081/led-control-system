@@ -40,12 +40,17 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/led-control-system/'),
   routes
 })
 
 router.beforeEach((to, from, next) => {
-  next()
+  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true'
+  if (to.name !== 'Login' && !isAuthenticated) {
+    next({ name: 'Login' })
+  } else {
+    next()
+  }
 })
 
 export default router
