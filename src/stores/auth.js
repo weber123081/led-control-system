@@ -23,7 +23,7 @@ export const useAuthStore = defineStore('auth', () => {
             // 模擬 API 調用
             const response = await new Promise((resolve) => {
                 setTimeout(() => {
-                    if (credentials.username === 'admin' && credentials.password === 'admin') {
+                    if (credentials.username === 'admin' && credentials.password === '000000') {
                         resolve({
                             token: 'admin-token',
                             user: {
