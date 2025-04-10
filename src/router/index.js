@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import Home from '../views/home.vue'
 import Schedule from '../views/Schedule.vue'
 import Logs from '../views/Logs.vue'
@@ -40,7 +40,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory('/led-control-system/'),
+  history: createWebHashHistory('/led-control-system/'),
   routes
 })
 
