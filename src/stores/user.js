@@ -1,34 +1,22 @@
 import { defineStore } from 'pinia'
-import { login as loginApi, logout as logoutApi, getUserInfo } from '../api'
 
 export const useUserStore = defineStore('user', {
     state: () => ({
-        isLoggedIn: true,
-        name: 'admin',
-        token: 'dummy-token',
-        functions: {
-            function1: true,
-            function2: true,
-            function3: true
-        }
+        isAuthenticated: localStorage.getItem('isAuthenticated') === 'true',
+        isAdmin: true,
+        username: '管理員',
+        userAvatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
     }),
 
     actions: {
         login() {
-            this.isLoggedIn = true
-            this.name = 'admin'
-            return true
+            this.isAuthenticated = true
+            localStorage.setItem('isAuthenticated', 'true')
         },
 
         logout() {
-            // 保持登录状态
-            return
-        },
-
-        checkAuth() {
-            this.isLoggedIn = true
-            this.name = 'admin'
-            return true
+            this.isAuthenticated = false
+            localStorage.removeItem('isAuthenticated')
         }
     }
 }) 
