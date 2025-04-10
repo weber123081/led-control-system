@@ -1,0 +1,118 @@
+.switch-container .status {
+    font-size: 30px;
+    color: #000000;
+    font-family: 'Potta One', cursive;
+}
+
+.switch-container {
+    width: 100%;
+    align-items: center;
+    margin-top: 30px;
+    margin-bottom: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 開關樣式 */
+.l {
+    display: block;
+    margin-bottom: 1.5em;
+    font-size: 1.1em;
+    /* 稍微減少 */
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 1em;
+    /* 稍微減少 */
+    box-shadow: 0.1em 0.1em 0 0.1em rgba(0, 0, 0, 0.3) inset;
+    /* 稍微減少 */
+    color: #fdea7b;
+    display: inline-flex;
+    align-items: center;
+    margin: auto;
+    padding: 0.14em;
+    /* 稍微減少 */
+    width: 3.3em;
+    /* 稍微減少 */
+    height: 1.65em;
+    /* 稍微減少 */
+    transition: background-color 0.1s 0.3s ease-out, box-shadow 0.1s 0.3s ease-out;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* 開關樣式的偽元素 */
+.l:before,
+.l:after {
+    content: "";
+    display: block;
+}
+
+.l:before {
+    background-color: #d7d7d7;
+    border-radius: 50%;
+    width: 1.32em;
+    /* 稍微減少 */
+    height: 1.32em;
+    /* 稍微減少 */
+    transition: background-color 0.1s 0.3s ease-out, transform 0.3s ease-out;
+    z-index: 1;
+}
+
+.l:after {
+    background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.15) 0) 0 50% / 50% 100%,
+        repeating-linear-gradient(90deg, #bbb 0, #bbb, #bbb 20%, #999 20%, #999 40%) 0 50% / 50% 100%,
+        radial-gradient(circle at 50% 50%, #888 25%, transparent 26%);
+    background-repeat: no-repeat;
+    border: 0.24em solid transparent;
+    /* 稍微減少 */
+    border-left: 0.42em solid #d8d8d8;
+    /* 稍微減少 */
+    border-right: 0 solid transparent;
+    transition: border-left-color 0.1s 0.3s ease-out, transform 0.3s ease-out;
+    transform: translateX(-24.5%);
+    /* 稍微調整 */
+    transform-origin: 25% 50%;
+    width: 1.32em;
+    /* 稍微減少 */
+    height: 1.1em;
+    /* 稍微減少 */
+    box-sizing: border-box;
+}
+
+/* 選中狀態的開關樣式 */
+.l:checked {
+    background-color: rgba(0, 0, 0, 0.45);
+    box-shadow: 0.1em 0.1em 0 0.1em rgba(0, 0, 0, 0.1) inset;
+    /* 稍微減少 */
+}
+
+.l:checked:before {
+    background-color: currentColor;
+    transform: translateX(125%);
+}
+
+.l:checked:after {
+    border-left-color: currentColor;
+    transform: translateX(-3%) rotateY(180deg);
+}
+
+/* 移除焦點輪廓 */
+.l:focus {
+    outline: 0;
+}
+
+/* 主容器樣式 */
+.led {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+    font-family: 'Stick', sans-serif;
+    font-size: 50px;
+    position: absolute;
+    top: 55px;
+    height: calc(100% - 55px);
+    width: 100%;
+    background-color: #696969;
+    color: #ffffff;
+}

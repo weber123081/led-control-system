@@ -1,0 +1,64 @@
+/* 主容器樣式 */
+.led {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    font-family: 'Stick', sans-serif;
+    font-size: 50px;
+    position: absolute;
+    top: 55px;
+    height: calc(100% - 55px);
+    width: 100%;
+    background-color: #A9A9A9;
+    color: #ffffff;
+}
+
+/* 按鈕容器樣式 */
+.button-container {
+    width: 25%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* router-link 樣式 */
+.led-button-link {
+    text-decoration: none;
+}
+
+/* 按鈕樣式 */
+.led-button {
+    width: 250px;
+    height: 300px;
+    font-size: 20px;
+    font-weight: bold;
+    background-color: #ffffff;
+    color: #313131;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* 圖片樣式 */
+.button-image {
+    width: 80%;
+    height: 200px;
+    margin-bottom: 10px;
+}
+
+/* 文字樣式 */
+.button-text {
+    font-size: 20px;
+}
+
+/* 按鈕懸停樣式 */
+.led-button:hover {
+    background-color: #fde8e8;
+}

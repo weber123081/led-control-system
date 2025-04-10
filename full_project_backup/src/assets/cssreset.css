@@ -1,0 +1,31 @@
+/* CSS reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif; /* 請根據您的偏好更換字體 */
+    font-size: 16px; /* 請根據您的需求更改基本字體大小 */
+    line-height: 1.5; /* 請根據您的需求更改行高 */
+}
+
+/* 清除列表樣式 */
+ul, ol {
+    list-style: none;
+}
+
+/* 清除超連結的默認樣式 */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* 清除表單元素的默認樣式 */
+input, button, textarea, select {
+    font-family: inherit;
+    font-size: inherit;
+}
+
+/* 如果需要，您可以添加更多的重置樣式，以確保跨瀏覽器的一致性 */

@@ -1,233 +1,274 @@
 <template>
-    <!-- 主要內容區 -->
-    <div class="pattern-grid-lg d-flex align-items-center justify-content-center vh-100 body">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 text-center">
-                    <!-- 標題 -->
-                    <h1 class="display-5">電燈開關系統</h1>
-                </div>
-            </div>
-
-            <!-- 登入表單 -->
-            <form class="custom-form-group" @submit.prevent="login">
-                <div class="row">
-                    <!-- 帳號輸入欄 -->
-                    <div class="col-6">
-                        <div class="wave-group">
-                            <input required type="text" class="input" v-model="username" name="username" />
-                            <span class="bar"></span>
-                            <label class="label">
-                                <span class="label-char" style="--index: 0">請</span>
-                                <span class="label-char" style="--index: 1">輸</span>
-                                <span class="label-char" style="--index: 2">入</span>
-                                <span class="label-char" style="--index: 3">帳</span>
-                                <span class="label-char" style="--index: 4">號</span>
-                            </label>
+    <div class="login-container">
+        <div class="background-animation"></div>
+        <el-card class="login-card">
+            <template #header>
+                <div class="card-header">
+                    <div class="logo">
+                        <div class="led-icon">
+                            <el-icon :size="32">
+                                <Lightning />
+                            </el-icon>
                         </div>
                     </div>
-
-                    <!-- 登入按鈕 -->
-                    <div class="col-6 text-right">
-                        <button class="button" tabindex="-1" @click="buttonClick">
-                            <!-- 登入圖示 -->
-                            <svg xmlns="http://www.w3.org/2000/svg" height="8em" viewBox="0 0 384 512" class="svg2">
-                                <path
-                                    d="M272 384c9.6-31.9 29.5-59.1 49.2-86.2l0 0c5.2-7.1 10.4-14.2 15.4-21.4c19.8-28.5 31.4-63 31.4-100.3C368 78.8 289.2 0 192 0S16 78.8 16 176c0 37.3 11.6 71.9 31.4 100.3c5 7.2 10.2 14.3 15.4 21.4l0 0c19.8 27.1 39.7 54.4 49.2 86.2H272zM192 512c44.2 0 80-35.8 80-80V416H112v16c0 44.2 35.8 80 80 80zM112 176c0 8.8-7.2 16-16 16s-16-7.2-16-16c0-61.9 50.1-112 112-112c8.8 0 16 7.2 16 16s-7.2 16-16 16c-44.2 0-80 35.8-80 80z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" height="8em" viewBox="0 0 384 512" class="svg">
-                                <path
-                                    d="M297.2 248.9C311.6 228.3 320 203.2 320 176c0-70.7-57.3-128-128-128S64 105.3 64 176c0 27.2 8.4 52.3 22.8 72.9c3.7 5.3 8.1 11.3 12.8 17.7l0 0c12.9 17.7 28.3 38.9 39.8 59.8c10.4 19 15.7 38.8 18.3 57.5H109c-2.2-12-5.9-23.7-11.8-34.5c-9.9-18-22.2-34.9-34.5-51.8l0 0 0 0c-5.2-7.1-10.4-14.2-15.4-21.4C27.6 247.9 16 213.3 16 176C16 78.8 94.8 0 192 0s176 78.8 176 176c0 37.3-11.6 71.9-31.4 100.3c-5 7.2-10.2 14.3-15.4 21.4l0 0 0 0c-12.3 16.8-24.6 33.7-34.5 51.8c-5.9 10.8-9.6 22.5-11.8 34.5H226.4c2.6-18.7 7.9-38.6 18.3-57.5c11.5-20.9 26.9-42.1 39.8-59.8l0 0 0 0 0 0c4.7-6.4 9-12.4 12.7-17.7zM192 128c-26.5 0-48 21.5-48 48c0 8.8-7.2 16-16 16s-16-7.2-16-16c0-44.2 35.8-80 80-80c8.8 0 16 7.2 16 16s-7.2 16-16 16zm0 384c-44.2 0-80-35.8-80-80V416H272v16c0 44.2-35.8 80-80 80z" />
-                            </svg>
-                        </button>
-                    </div>
+                    <h2>LED 控制系統</h2>
                 </div>
-
-                <div class="row">
-                    <!-- 密碼輸入欄 -->
-                    <div class="col-6">
-                        <div class="wave-group">
-                            <input required type="password" class="input" v-model="password" name="password" />
-                            <span class="bar"></span>
-                            <label class="label">
-                                <span class="label-char" style="--index: 0">請</span>
-                                <span class="label-char" style="--index: 1">輸</span>
-                                <span class="label-char" style="--index: 2">入</span>
-                                <span class="label-char" style="--index: 3">密</span>
-                                <span class="label-char" style="--index: 4">碼</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
+            </template>
+            <el-form :model="loginForm" :rules="rules" ref="loginFormRef">
+                <el-form-item prop="username">
+                    <el-input v-model="loginForm.username" placeholder="使用者名稱">
+                        <template #prefix>
+                            <el-icon>
+                                <User />
+                            </el-icon>
+                        </template>
+                    </el-input>
+                </el-form-item>
+                <el-form-item prop="password">
+                    <el-input v-model="loginForm.password" type="password" placeholder="密碼" show-password>
+                        <template #prefix>
+                            <el-icon>
+                                <Lock />
+                            </el-icon>
+                        </template>
+                    </el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="handleLogin" :loading="loading" class="login-button">
+                        登入
+                    </el-button>
+                </el-form-item>
+            </el-form>
+        </el-card>
     </div>
 </template>
-<script>
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 
-export default {
-    setup() {
-        const username = ref('');
-        const password = ref('');
-        const router = useRouter();
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import { User, Lock, Lightning } from '@element-plus/icons-vue'
 
-        const login = async () => {
+const router = useRouter()
+const loginFormRef = ref(null)
+const loading = ref(false)
 
+const loginForm = ref({
+    username: '',
+    password: ''
+})
 
-            try {
-                const formData = new FormData();
-                formData.append('username', username.value);
-                formData.append('password', password.value);
+const rules = {
+    username: [
+        { required: true, message: '請輸入使用者名稱', trigger: 'blur' }
+    ],
+    password: [
+        { required: true, message: '請輸入密碼', trigger: 'blur' }
+    ]
+}
 
-                const response = await fetch('/login', {
-                    method: 'POST',
-                    mode: 'cors',
-                    body: formData,
-                });
-
-                if (response.ok) {
-                    alert("登入成功");
-                    router.push('/home');
-                } else {
-                    alert("登入失敗");
-                }
-            } catch (error) {
-                console.error('錯誤:', error);
+const handleLogin = () => {
+    if (loginFormRef.value) {
+        loginFormRef.value.validate((valid) => {
+            if (valid) {
+                loading.value = true
+                setTimeout(() => {
+                    loading.value = false
+                    ElMessage.success('登入成功')
+                    router.push('/')
+                }, 1000)
             }
-        };
-
-        const buttonClick = () => {
-            // 在這裡添加其他按鈕點擊事件的處理邏輯
-        };
-
-        return {
-            username,
-            password,
-            login,
-            buttonClick,
-        };
-    },
-};
+        })
+    }
+}
 </script>
+
 <style scoped>
-/* 全局設置 */
-.body {
-    background-image: url(../assets/login.jpg);
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-}
-
-/* 表單容器樣式 */
-.custom-form-group {
-    max-width: 300px;
-    margin: 0 auto;
-}
-
-/* 行樣式 */
-.row {
-    margin-top: 30px;
-}
-
-/* 輸入框樣式 */
-.wave-group {
-    position: relative;
-}
-
-.wave-group .input {
-    font-size: 16px;
-    padding: 10px 10px 10px 5px;
-    display: block;
-    width: 270px;
-    border: none;
-    border-bottom: 1px solid #515151;
-    background: transparent;
-}
-
-.wave-group .input:focus {
-    outline: none;
-}
-
-/* 標籤樣式 */
-.wave-group .label {
-    color: #999;
-    font-size: 18px;
-    position: absolute;
-    pointer-events: none;
-    left: 5px;
-    top: 5px;
+.login-container {
+    height: 100vh;
     display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #1e2a4a 0%, #293c67 100%);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    overflow: hidden;
 }
 
-.wave-group .label-char {
-    transition: 0.2s ease all;
-    transition-delay: calc(var(--index) * 0.05s);
-}
-
-.wave-group .input:focus~.label .label-char,
-.wave-group .input:valid~.label .label-char {
-    transform: translateY(-20px);
-    font-size: 14px;
-    color: #000247;
-}
-
-/* 底部條紋效果 */
-.wave-group .bar {
-    position: relative;
-    display: block;
-    width: 540px;
-}
-
-.wave-group .bar:before,
-.wave-group .bar:after {
-    content: '';
-    height: 4px;
-    width: 0;
-    bottom: 1px;
+.background-animation {
     position: absolute;
-    background: #000e45;
-    transition: 0.2s ease all;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.2) 100%);
+    opacity: 0.8;
+    animation: pulse 4s ease-in-out infinite;
 }
 
-.wave-group .input:focus~.bar:before,
-.wave-group .input:focus~.bar:after {
-    width: 50%;
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 0.6;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
 }
 
-/* 按鈕樣式 */
-.button {
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    margin: 20px;
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transform: translateY(0);
+    transition: transform 0.3s ease;
+}
+
+.login-card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    text-align: center;
+    padding: 24px 0;
+}
+
+.logo {
+    margin-bottom: 24px;
     position: relative;
-    border: none;
-    background-color: transparent;
+}
+
+.led-icon {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
-    cursor: grab;
+    background: linear-gradient(145deg, #3699ff, #2575e6);
+    color: white;
+    position: relative;
+    overflow: hidden;
+    animation: float 3s ease-in-out infinite;
+    transform: rotate(-10deg);
 }
 
-/* 普通狀態下的圖標樣式 */
-.button .svg,
-.button .svg2 {
+.led-icon::before {
+    content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(150%, -20%);
-    transition: all 1s;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.1) 45%,
+            rgba(255, 255, 255, 0.2) 50%,
+            rgba(255, 255, 255, 0.1) 55%,
+            transparent 100%);
+    transform: rotate(45deg);
+    animation: shine 3s ease-in-out infinite;
 }
 
-.button:hover .svg {
-    fill: #000000;
+.led-icon :deep(svg) {
+    font-size: 36px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    transform: translateZ(0) rotate(10deg);
 }
 
-.button .svg2 {
-    fill: #626161;
-    opacity: 0.5;
-    transition: opacity 0.5s;
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+        box-shadow: 0 10px 20px rgba(54, 153, 255, 0.2);
+    }
+
+    50% {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 30px rgba(54, 153, 255, 0.3);
+    }
 }
 
-.button:hover .svg2 {
-    opacity: 1;
-    fill: #ffffff;
+@keyframes shine {
+    0% {
+        transform: translateX(-200%) translateY(-200%) rotate(45deg);
+    }
+
+    40%,
+    100% {
+        transform: translateX(200%) translateY(200%) rotate(45deg);
+    }
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 28px;
+    background: linear-gradient(to right, #3699ff, #2575e6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+:deep(.el-input__wrapper) {
+    padding-left: 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+}
+
+:deep(.el-input__wrapper:hover) {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+:deep(.el-input__prefix) {
+    width: 30px;
+    justify-content: center;
+    color: #909399;
+}
+
+.login-button {
+    width: 100%;
+    padding: 12px 0;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.login-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+}
+
+@media screen and (max-width: 480px) {
+    .login-card {
+        margin: 16px;
+    }
+
+    .card-header h2 {
+        font-size: 20px;
+    }
+
+    .led-icon {
+        width: 56px;
+        height: 56px;
+    }
 }
 </style>

@@ -1,29 +1,67 @@
-# led
+# LED 控制系統
 
-This template should help get you started developing with Vue 3 in Vite.
+這是一個基於 Vue 3 + Element Plus 的 LED 控制系統前端專案。
 
-## Recommended IDE Setup
+## 功能特點
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- 🔐 使用者權限管理
+- 💡 LED 開關控制
+- ⏱️ 定時排程設置
+- 📝 操作日誌記錄
+- ⚙️ 設備管理配置
 
-## Customize configuration
+## 技術棧
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+- Vue 3
+- Element Plus
+- Vue Router
+- Vite
+- JavaScript/ES6+
 
-## Project Setup
+## 安裝與運行
 
-```sh
+1. 克隆專案
+
+```bash
+git clone https://github.com/yourusername/led-control-system.git
+cd led-control-system
+```
+
+2. 安裝依賴
+
+```bash
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+3. 運行開發環境
 
-```sh
+```bash
 npm run dev
 ```
 
-### Compile and Minify for Production
+4. 建置生產環境
 
-```sh
+```bash
 npm run build
 ```
+
+## 系統要求
+
+- Node.js 16+
+- npm 7+
+
+## 瀏覽器支援
+
+- Chrome
+- Firefox
+- Safari
+- Edge
+
+## 開發團隊
+
+- 前端開發：[Your Name]
+- 設計：[Your Name]
+
+## 授權
+
+MIT License

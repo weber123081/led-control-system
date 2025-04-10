@@ -14,9 +14,6 @@ dist-ssr
 coverage
 *.local
 
-/cypress/videos/
-/cypress/screenshots/
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -27,4 +24,19 @@ coverage
 *.sln
 *.sw?
 
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Build files
+dist/
+dist-ssr/
 *.tsbuildinfo
+
+# System files
+.DS_Store
+Thumbs.db
+
+/cypress/videos/
+/cypress/screenshots/
