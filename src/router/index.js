@@ -51,10 +51,15 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
+  console.log('路由守衛觸發:', to.name)
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true'
+  console.log('認證狀態:', isAuthenticated)
+
   if (to.meta.requiresAuth && !isAuthenticated) {
+    console.log('需要認證，重定向到登入頁面')
     next({ name: 'Login' })
   } else {
+    console.log('允許訪問:', to.name)
     next()
   }
 })
