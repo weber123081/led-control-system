@@ -1,6 +1,6 @@
 <template>
     <el-config-provider :locale="zhTw">
-        <router-view v-if="!isAuthenticated"></router-view>
+        <router-view v-if="!userStore.isAuthenticated"></router-view>
         <el-container v-else class="app-container">
             <!-- 漢堡菜單按鈕 -->
             <div class="menu-toggle" :class="{ 'is-active': isCollapse }" @click="toggleSidebar">
@@ -43,7 +43,7 @@
                         </el-icon>
                         <template #title>設備設置</template>
                     </el-menu-item>
-                    <el-menu-item index="/roles" v-if="isAdmin">
+                    <el-menu-item index="/roles" v-if="userStore.isAdmin">
                         <el-icon>
                             <UserFilled />
                         </el-icon>
@@ -58,8 +58,8 @@
                     <div class="header-right">
                         <el-dropdown @command="handleCommand">
                             <span class="user-info">
-                                <el-avatar :size="32" :src="userAvatar" />
-                                <span class="username">{{ username }}</span>
+                                <el-avatar :size="32" :src="userStore.userAvatar" />
+                                <span class="username">{{ userStore.username }}</span>
                             </span>
                             <template #dropdown>
                                 <el-dropdown-menu>
@@ -84,17 +84,14 @@ import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import zhTw from 'element-plus/dist/locale/zh-tw.mjs'
 import { HomeFilled, Timer, Document, Setting, Fold, Expand, Lock, UserFilled } from '@element-plus/icons-vue'
-import { logout } from '@/api'
+import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
 const route = useRoute()
-const userAvatar = ref('https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png')
-const username = ref('管理員')
+const userStore = useUserStore()
 const isCollapse = ref(false)
 const windowWidth = ref(window.innerWidth)
 const isLargeScreen = computed(() => windowWidth.value > 1024)
-const isAdmin = ref(true)
-const isAuthenticated = ref(localStorage.getItem('isAuthenticated') === 'true')
 
 const handleResize = () => {
     windowWidth.value = window.innerWidth
@@ -107,7 +104,7 @@ onMounted(() => {
     handleResize()
     window.addEventListener('resize', handleResize)
     // 檢查登入狀態
-    if (!isAuthenticated.value) {
+    if (!userStore.isAuthenticated) {
         router.push('/login')
     }
 })
@@ -128,15 +125,9 @@ const toggleSidebar = () => {
 
 const activeMenu = computed(() => route.path)
 
-const handleRoleChange = (value) => {
-    isAdmin.value = value
-    ElMessage.success(`已切換到${value ? '管理員' : '一般用戶'}模式`)
-}
-
 const handleCommand = (command) => {
     if (command === 'logout') {
-        localStorage.removeItem('isAuthenticated')
-        isAuthenticated.value = false
+        userStore.logout()
         router.push('/login')
         ElMessage.success('已登出')
     }
