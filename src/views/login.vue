@@ -72,11 +72,18 @@ const handleLogin = () => {
         loginFormRef.value.validate((valid) => {
             if (valid) {
                 loading.value = true
-                setTimeout(() => {
+                // 檢查預設帳號密碼
+                if (loginForm.value.username === 'admin' && loginForm.value.password === 'admin123') {
+                    setTimeout(() => {
+                        loading.value = false
+                        localStorage.setItem('isAuthenticated', 'true')
+                        ElMessage.success('登入成功')
+                        router.push('/')
+                    }, 1000)
+                } else {
                     loading.value = false
-                    ElMessage.success('登入成功')
-                    router.push('/')
-                }, 1000)
+                    ElMessage.error('帳號或密碼錯誤')
+                }
             }
         })
     }
