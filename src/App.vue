@@ -1,6 +1,7 @@
 <template>
     <el-config-provider :locale="zhTw">
-        <el-container class="app-container">
+        <router-view v-if="!isAuthenticated"></router-view>
+        <el-container v-else class="app-container">
             <!-- 漢堡菜單按鈕 -->
             <div class="menu-toggle" :class="{ 'is-active': isCollapse }" @click="toggleSidebar">
                 <el-icon size="24">
@@ -93,6 +94,7 @@ const isCollapse = ref(false)
 const windowWidth = ref(window.innerWidth)
 const isLargeScreen = computed(() => windowWidth.value > 1024)
 const isAdmin = ref(true)
+const isAuthenticated = ref(localStorage.getItem('isAuthenticated') === 'true')
 
 const handleResize = () => {
     windowWidth.value = window.innerWidth
@@ -104,6 +106,10 @@ const handleResize = () => {
 onMounted(() => {
     handleResize()
     window.addEventListener('resize', handleResize)
+    // 檢查登入狀態
+    if (!isAuthenticated.value) {
+        router.push('/login')
+    }
 })
 
 onUnmounted(() => {
@@ -129,6 +135,9 @@ const handleRoleChange = (value) => {
 
 const handleCommand = (command) => {
     if (command === 'logout') {
+        localStorage.removeItem('isAuthenticated')
+        isAuthenticated.value = false
+        router.push('/login')
         ElMessage.success('已登出')
     }
 }
