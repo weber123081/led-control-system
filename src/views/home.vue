@@ -2,8 +2,8 @@
     <div class="home-container">
         <!-- 角色切換開關 -->
         <div class="role-switch">
-            <span class="role-label">{{ isAdmin ? '管理員模式' : '一般用戶模式' }}</span>
             <el-switch v-model="isAdminMode" active-text="管理員" inactive-text="一般用戶" @change="handleRoleChange" />
+            <span class="role-label">{{ isAdmin ? '管理員模式' : '一般用戶模式' }}</span>
         </div>
 
         <!-- 只有管理員可以看到的按鈕組 -->
@@ -58,7 +58,7 @@
                                         刪除開關
                                     </el-button>
                                 </div>
-            </div>
+                            </div>
                         </template>
                     </div>
                 </div>
@@ -439,6 +439,425 @@ const handleSortTouchEnd = (event) => {
         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
     }
 }
+
+/* 優化動畫性能 */
+.switch-card {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* 只在需要時啟用動畫 */
+@media (hover: hover) {
+    .switch-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* 優化拖拽時的動畫 */
+.switch-card.dragging {
+    transition: none !important;
+    transform: scale(1.05) translateZ(0);
+    z-index: 100;
+}
+
+/* 優化其他卡片的動畫 */
+.switch-card:not(.dragging) {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* 移除不必要的動畫 */
+@media (prefers-reduced-motion: reduce) {
+    .switch-card {
+        transition: none !important;
+    }
+}
+
+/* 優化拖拽手柄的動畫 */
+.drag-handle {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* 優化排序列表的動畫 */
+.sortable-list {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+.sortable-item {
+    will-change: transform;
+    transform: translateZ(0);
+    transition: transform 0.2s ease;
+}
+
+/* 優化拖拽時的視覺效果 */
+.sortable-item.dragging {
+    transition: none !important;
+    transform: scale(1.05) translateZ(0);
+    z-index: 100;
+}
+
+/* 優化按鈕動畫 */
+.action-button {
+    will-change: transform;
+    transform: translateZ(0);
+    transition: transform 0.2s ease;
+}
+
+/* 優化開關狀態動畫 */
+.switch-status {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+}
+
+/* 優化卡片內容動畫 */
+.card-content {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* 優化拖拽提示動畫 */
+.drag-prompt {
+    will-change: opacity;
+    transform: translateZ(0);
+}
+
+/* 優化長按效果 */
+.switch-card.long-pressing {
+    transition: none !important;
+    transform: scale(1.05) translateZ(0);
+}
+
+/* 優化其他卡片的透明度變化 */
+.switch-card:not(.long-pressing) {
+    transition: opacity 0.2s ease;
+}
+
+/* 優化按鈕點擊效果 */
+.action-button:active {
+    transform: scale(0.95) translateZ(0);
+}
+
+/* 優化開關按鈕動畫 */
+.switch-button {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* 優化卡片標題動畫 */
+.card-title {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* 優化卡片描述動畫 */
+.card-description {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* 優化卡片圖標動畫 */
+.card-icon {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* 優化卡片操作按鈕動畫 */
+.card-actions {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* 優化卡片狀態標籤動畫 */
+.status-tag {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* 優化卡片拖拽手柄動畫 */
+.drag-handle-icon {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* 優化卡片陰影動畫 */
+.card-shadow {
+    will-change: box-shadow;
+    transform: translateZ(0);
+}
+
+/* 優化卡片邊框動畫 */
+.card-border {
+    will-change: border-color;
+    transform: translateZ(0);
+}
+
+/* 優化卡片背景動畫 */
+.card-background {
+    will-change: background-color;
+    transform: translateZ(0);
+}
+
+/* 優化卡片內容容器動畫 */
+.card-container {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* 優化卡片懸停效果 */
+@media (hover: hover) {
+    .switch-card:hover .card-content {
+        transform: translateY(-2px) translateZ(0);
+    }
+}
+
+/* 優化卡片點擊效果 */
+.switch-card:active {
+    transform: scale(0.98) translateZ(0);
+}
+
+/* 優化卡片過渡效果 */
+.switch-card-enter-active,
+.switch-card-leave-active {
+    transition: all 0.3s ease;
+    transform: translateZ(0);
+}
+
+.switch-card-enter-from,
+.switch-card-leave-to {
+    opacity: 0;
+    transform: translateY(20px) translateZ(0);
+}
+
+/* 優化排序列表過渡效果 */
+.sortable-list-move {
+    transition: transform 0.3s ease;
+    transform: translateZ(0);
+}
+
+/* 優化拖拽提示過渡效果 */
+.drag-prompt-enter-active,
+.drag-prompt-leave-active {
+    transition: opacity 0.3s ease;
+    transform: translateZ(0);
+}
+
+.drag-prompt-enter-from,
+.drag-prompt-leave-to {
+    opacity: 0;
+    transform: translateY(10px) translateZ(0);
+}
+
+/* 優化按鈕過渡效果 */
+.action-button-enter-active,
+.action-button-leave-active {
+    transition: all 0.3s ease;
+    transform: translateZ(0);
+}
+
+.action-button-enter-from,
+.action-button-leave-to {
+    opacity: 0;
+    transform: translateY(10px) translateZ(0);
+}
+
+/* 優化開關狀態過渡效果 */
+.switch-status-enter-active,
+.switch-status-leave-active {
+    transition: all 0.3s ease;
+    transform: translateZ(0);
+}
+
+.switch-status-enter-from,
+.switch-status-leave-to {
+    opacity: 0;
+    transform: scale(0.8) translateZ(0);
+}
+
+/* 優化卡片內容過渡效果 */
+.card-content-enter-active,
+.card-content-leave-active {
+    transition: all 0.3s ease;
+    transform: translateZ(0);
+}
+
+.card-content-enter-from,
+.card-content-leave-to {
+    opacity: 0;
+    transform: translateY(10px) translateZ(0);
+}
+
+/* 優化長按效果過渡 */
+.long-press-enter-active,
+.long-press-leave-active {
+    transition: all 0.3s ease;
+    transform: translateZ(0);
+}
+
+.long-press-enter-from,
+.long-press-leave-to {
+    opacity: 0;
+    transform: scale(0.8) translateZ(0);
+}
+
+/* 優化按鈕點擊過渡效果 */
+.button-click-enter-active,
+.button-click-leave-active {
+    transition: all 0.2s ease;
+    transform: translateZ(0);
+}
+
+.button-click-enter-from,
+.button-click-leave-to {
+    opacity: 0;
+    transform: scale(0.9) translateZ(0);
+}
+
+/* 優化開關按鈕過渡效果 */
+.switch-button-enter-active,
+.switch-button-leave-active {
+    transition: all 0.3s ease;
+    transform: translateZ(0);
+}
+
+.switch-button-enter-from,
+.switch-button-leave-to {
+    opacity: 0;
+    transform: scale(0.8) translateZ(0);
+}
+
+/* 優化卡片標題過渡效果 */
+.card-title-enter-active,
+.card-title-leave-active {
+    transition: all 0.3s ease;
+    transform: translateZ(0);
+}
+
+.card-title-enter-from,
+.card-title-leave-to {
+    opacity: 0;
+    transform: translateY(10px) translateZ(0);
+}
+
+/* 優化卡片描述過渡效果 */
+.card-description-enter-active,
+.card-description-leave-active {
+    transition: all 0.3s ease;
+    transform: translateZ(0);
+}
+
+.card-description-enter-from,
+.card-description-leave-to {
+    opacity: 0;
+    transform: translateY(10px) translateZ(0);
+}
+
+/* 優化卡片圖標過渡效果 */
+.card-icon-enter-active,
+.card-icon-leave-active {
+    transition: all 0.3s ease;
+    transform: translateZ(0);
+}
+
+.card-icon-enter-from,
+.card-icon-leave-to {
+    opacity: 0;
+    transform: scale(0.8) translateZ(0);
+}
+
+/* 優化卡片操作按鈕過渡效果 */
+.card-actions-enter-active,
+.card-actions-leave-active {
+    transition: all 0.3s ease;
+    transform: translateZ(0);
+}
+
+.card-actions-enter-from,
+.card-actions-leave-to {
+    opacity: 0;
+    transform: translateY(10px) translateZ(0);
+}
+
+/* 優化卡片狀態標籤過渡效果 */
+.status-tag-enter-active,
+.status-tag-leave-active {
+    transition: all 0.3s ease;
+    transform: translateZ(0);
+}
+
+.status-tag-enter-from,
+.status-tag-leave-to {
+    opacity: 0;
+    transform: scale(0.8) translateZ(0);
+}
+
+/* 優化卡片拖拽手柄過渡效果 */
+.drag-handle-enter-active,
+.drag-handle-leave-active {
+    transition: all 0.3s ease;
+    transform: translateZ(0);
+}
+
+.drag-handle-enter-from,
+.drag-handle-leave-to {
+    opacity: 0;
+    transform: scale(0.8) translateZ(0);
+}
+
+/* 優化卡片陰影過渡效果 */
+.card-shadow-enter-active,
+.card-shadow-leave-active {
+    transition: all 0.3s ease;
+    transform: translateZ(0);
+}
+
+.card-shadow-enter-from,
+.card-shadow-leave-to {
+    opacity: 0;
+    transform: scale(0.8) translateZ(0);
+}
+
+/* 優化卡片邊框過渡效果 */
+.card-border-enter-active,
+.card-border-leave-active {
+    transition: all 0.3s ease;
+    transform: translateZ(0);
+}
+
+.card-border-enter-from,
+.card-border-leave-to {
+    opacity: 0;
+    transform: scale(0.8) translateZ(0);
+}
+
+/* 優化卡片背景過渡效果 */
+.card-background-enter-active,
+.card-background-leave-active {
+    transition: all 0.3s ease;
+    transform: translateZ(0);
+}
+
+.card-background-enter-from,
+.card-background-leave-to {
+    opacity: 0;
+    transform: scale(0.8) translateZ(0);
+}
+
+/* 優化卡片內容容器過渡效果 */
+.card-container-enter-active,
+.card-container-leave-active {
+    transition: all 0.3s ease;
+    transform: translateZ(0);
+}
+
+.card-container-enter-from,
+.card-container-leave-to {
+    opacity: 0;
+    transform: translateY(10px) translateZ(0);
+}
 </style>
 
 <style scoped>
@@ -450,8 +869,8 @@ const handleSortTouchEnd = (event) => {
 
 .role-switch {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 5px;
+    right: 120px;
     z-index: 1000;
     background: white;
     padding: 10px 16px;
@@ -460,11 +879,19 @@ const handleSortTouchEnd = (event) => {
     display: flex;
     align-items: center;
     gap: 12px;
+    transition: all 0.3s ease;
+}
+
+.role-switch:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
 }
 
 .role-label {
     font-size: 14px;
     color: #606266;
+    margin-left: 8px;
+    font-weight: 500;
 }
 
 .main-content {
@@ -722,25 +1149,148 @@ const handleSortTouchEnd = (event) => {
 }
 
 @media screen and (max-width: 768px) {
-    .sortable-list {
-        padding: 8px;
+    .home-container {
+        padding: 10px;
     }
 
-    .sortable-item {
-        padding: 16px;
+    .role-switch {
+        top: 10px;
+        right: 80px;
+        padding: 8px 12px;
+        transform: scale(0.9);
     }
 
-    .drag-handle {
-        margin-right: 16px;
+    .role-label {
+        display: none;
+    }
+
+    .action-buttons-group {
+        right: 10px;
+        bottom: 10px;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .action-button {
+        padding: 8px 12px;
+        width: 120px;
+        justify-content: center;
+    }
+
+    .switch-card {
+        margin-bottom: 15px;
+    }
+
+    .switch-content {
+        padding: 12px;
+    }
+
+    .switch-header {
+        margin-bottom: 8px;
     }
 
     .switch-name {
+        font-size: 15px;
+    }
+
+    .switch-details {
+        margin-top: 12px;
+        padding-top: 12px;
+    }
+
+    .info-item {
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+
+    /* 優化排序列表在移動設備上的顯示 */
+    .sortable-list {
+        padding: 8px;
+        max-height: 60vh;
+    }
+
+    .sortable-item {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .drag-handle {
+        margin-right: 8px;
         font-size: 16px;
     }
 
     .switch-gpio {
-        font-size: 14px;
-        padding: 4px 10px;
+        font-size: 12px;
+        padding: 2px 6px;
+    }
+
+    /* 優化對話框在移動設備上的顯示 */
+    :deep(.el-dialog) {
+        width: 90% !important;
+        margin: 5vh auto !important;
+    }
+
+    :deep(.el-dialog__body) {
+        padding: 15px;
+    }
+
+    :deep(.el-form-item) {
+        margin-bottom: 15px;
+    }
+
+    /* 優化開關按鈕在移動設備上的觸控區域 */
+    :deep(.el-switch) {
+        transform: scale(1.2);
+    }
+
+    /* 優化按鈕在移動設備上的觸控區域 */
+    .edit-button {
+        padding: 8px;
+    }
+
+    .delete-button {
+        padding: 8px 12px;
+    }
+
+    /* 優化卡片在移動設備上的交互 */
+    .switch-card {
+        touch-action: manipulation;
+    }
+
+    .switch-card:active {
+        transform: scale(0.98);
+    }
+
+    /* 優化排序列表在移動設備上的交互 */
+    .sortable-item {
+        touch-action: none;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+    }
+
+    .sortable-item:active {
+        transform: scale(1.02);
+    }
+
+    /* 優化拖拽手柄在移動設備上的交互 */
+    .drag-handle {
+        touch-action: none;
+    }
+
+    /* 優化按鈕在移動設備上的點擊效果 */
+    .action-button:active {
+        transform: scale(0.95);
+    }
+
+    /* 優化卡片內容在移動設備上的顯示 */
+    .card-content {
+        padding: 10px;
+    }
+
+    /* 優化狀態標籤在移動設備上的顯示 */
+    .status-tag {
+        padding: 2px 6px;
+        font-size: 12px;
     }
 }
 </style>
