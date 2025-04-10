@@ -105,10 +105,19 @@ const request = async (endpoint, options = {}) => {
 // 用戶認證相關 API
 export const authAPI = {
     login: async (username, password) => {
-        return request('/login', {
-            method: 'POST',
-            body: JSON.stringify({ username, password })
-        })
+        // 本地驗證
+        if (username === 'admin' && password === '000000') {
+            return {
+                token: 'admin-token',
+                user: {
+                    id: 1,
+                    username: 'admin',
+                    role: 'admin',
+                    name: '管理員'
+                }
+            }
+        }
+        throw new Error('帳號或密碼錯誤')
     },
     logout: async () => {
         return request('/logout', { method: 'POST' })
