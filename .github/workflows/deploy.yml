@@ -22,24 +22,43 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "18"
           cache: "npm"
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
-      - name: List files
-        run: ls -la
+
+      - name: Debug - List files
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Files in current directory:"
+          ls -la
+          echo "Files in src directory:"
+          ls -la src
+
       - name: Install dependencies
         run: |
+          echo "Installing dependencies..."
           npm install
+          echo "Dependencies installed:"
           npm list
+
       - name: Build with Vite
         run: |
           echo "Building with Vite..."
-          npm run build || echo "Build failed"
+          npm run build
+          echo "Build completed. Contents of dist directory:"
           ls -la dist
+          echo "Checking for index.html:"
+          ls -la dist/index.html
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
