@@ -14,27 +14,15 @@
                     <h2>LED 控制系統</h2>
                 </div>
             </template>
-            <el-form :model="loginForm" :rules="rules" ref="loginFormRef">
-                <el-form-item prop="username">
-                    <el-input v-model="loginForm.username" placeholder="使用者名稱">
-                        <template #prefix>
-                            <el-icon>
-                                <User />
-                            </el-icon>
-                        </template>
-                    </el-input>
+            <el-form ref="loginFormRef" :model="loginForm" :rules="rules" label-width="80px" class="login-form">
+                <el-form-item label="帳號" prop="username">
+                    <el-input v-model="loginForm.username" placeholder="請輸入帳號" />
                 </el-form-item>
-                <el-form-item prop="password">
-                    <el-input v-model="loginForm.password" type="password" placeholder="密碼" show-password>
-                        <template #prefix>
-                            <el-icon>
-                                <Lock />
-                            </el-icon>
-                        </template>
-                    </el-input>
+                <el-form-item label="密碼" prop="password">
+                    <el-input v-model="loginForm.password" type="password" placeholder="請輸入密碼" />
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="handleLogin" :loading="loading" class="login-button">
+                    <el-button type="primary" :loading="loading" @click="handleLogin" style="width: 100%">
                         登入
                     </el-button>
                 </el-form-item>
@@ -46,10 +34,13 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
-import { User, Lock, Lightning } from '@element-plus/icons-vue'
+import { Lightning } from '@element-plus/icons-vue'
+import { authAPI } from '@/services/api'
 
 const router = useRouter()
+const userStore = useUserStore()
 const loginFormRef = ref(null)
 const loading = ref(false)
 
@@ -67,25 +58,48 @@ const rules = {
     ]
 }
 
-const handleLogin = () => {
-    if (loginFormRef.value) {
-        loginFormRef.value.validate((valid) => {
-            if (valid) {
-                loading.value = true
-                // 檢查預設帳號密碼
-                if (loginForm.value.username === 'admin' && loginForm.value.password === 'admin123') {
-                    setTimeout(() => {
-                        loading.value = false
-                        localStorage.setItem('isAuthenticated', 'true')
-                        ElMessage.success('登入成功')
-                        router.push('/')
-                    }, 1000)
-                } else {
-                    loading.value = false
-                    ElMessage.error('帳號或密碼錯誤')
-                }
+const handleLogin = async () => {
+    console.log('登入按鈕被點擊')
+    console.log('表單數據:', loginForm.value)
+
+    if (!loginFormRef.value) {
+        console.log('表單引用不存在')
+        return
+    }
+
+    try {
+        console.log('開始表單驗證')
+        const valid = await loginFormRef.value.validate()
+        console.log('表單驗證結果:', valid)
+
+        if (valid) {
+            loading.value = true
+            console.log('登入表單驗證通過')
+
+            try {
+                const response = await authAPI.login(loginForm.value.username, loginForm.value.password)
+                console.log('登入成功:', response)
+                // 設置登入狀態
+                localStorage.setItem('isAuthenticated', 'true')
+                localStorage.setItem('isAdmin', 'true')
+                userStore.login()
+                console.log('設置登入狀態完成')
+                ElMessage.success('登入成功')
+                // 使用 router.push 進行跳轉
+                router.push({ name: 'Home' })
+            } catch (error) {
+                console.log('登入失敗:', error)
+                ElMessage.error('帳號或密碼錯誤')
             }
-        })
+        } else {
+            console.log('表單驗證失敗')
+            ElMessage.error('請填寫正確的登入資訊')
+        }
+    } catch (error) {
+        console.error('登入過程發生錯誤:', error)
+        ElMessage.error('登入過程發生錯誤')
+    } finally {
+        loading.value = false
     }
 }
 </script>
