@@ -79,7 +79,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import zhTw from 'element-plus/dist/locale/zh-tw.mjs'
@@ -99,6 +99,13 @@ const handleResize = () => {
         isCollapse.value = false
     }
 }
+
+// 監聽認證狀態變化
+watch(() => userStore.isAuthenticated, (newValue) => {
+    if (!newValue && route.path !== '/login') {
+        router.push('/login')
+    }
+})
 
 onMounted(() => {
     handleResize()
@@ -128,6 +135,7 @@ const activeMenu = computed(() => route.path)
 const handleCommand = (command) => {
     if (command === 'logout') {
         userStore.logout()
+        localStorage.removeItem('isAuthenticated')
         router.push('/login')
         ElMessage.success('已登出')
     }
