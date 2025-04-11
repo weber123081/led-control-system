@@ -24,27 +24,36 @@
                     <div class="schedule-content">
                         <div class="time-picker">
                             <div class="time-item">
-                                <el-icon>
-                                    <Sunny />
-                                </el-icon>
+                                <div class="time-label">
+                                    <el-icon>
+                                        <Sunny />
+                                    </el-icon>
+                                    <span>開啟時間</span>
+                                </div>
                                 <el-time-picker v-model="sw.onTime" placeholder="開啟時間" format="HH:mm"
                                     value-format="HH:mm" class="time-input" />
                             </div>
                             <div class="time-item">
-                                <el-icon>
-                                    <Moon />
-                                </el-icon>
+                                <div class="time-label">
+                                    <el-icon>
+                                        <Moon />
+                                    </el-icon>
+                                    <span>關閉時間</span>
+                                </div>
                                 <el-time-picker v-model="sw.offTime" placeholder="關閉時間" format="HH:mm"
                                     value-format="HH:mm" class="time-input" />
                             </div>
                         </div>
-                        <div class="weekdays">
-                            <el-checkbox-group v-model="sw.weekdays">
-                                <el-checkbox v-for="day in weekdays" :key="day.value" :label="day.value"
-                                    class="weekday-checkbox">
-                                    {{ day.label }}
-                                </el-checkbox>
-                            </el-checkbox-group>
+                        <div class="weekdays-container">
+                            <div class="weekdays-label">選擇星期</div>
+                            <div class="weekdays">
+                                <el-checkbox-group v-model="sw.weekdays">
+                                    <el-checkbox v-for="day in weekdays" :key="day.value" :label="day.value"
+                                        class="weekday-checkbox">
+                                        {{ day.label }}
+                                    </el-checkbox>
+                                </el-checkbox-group>
+                            </div>
                         </div>
                         <div class="schedule-actions">
                             <el-button type="primary" @click="saveSchedule(sw)" class="save-button">
@@ -115,14 +124,14 @@ onMounted(() => {
 <style scoped>
 .schedule-container {
     padding: 20px;
-    background-color: #f5f7fa;
-    min-height: 100vh;
+    min-height: calc(100vh - 60px);
+    background-color: var(--bg-color, #f5f7fa);
 }
 
 .schedule-card {
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    background: white;
+    background: var(--panel-bg, white);
     border: none;
 }
 
@@ -137,8 +146,8 @@ onMounted(() => {
     margin: 0;
     font-size: 24px;
     font-weight: 600;
-    color: #303133;
-    background: linear-gradient(45deg, #409EFF, #67C23A);
+    color: var(--text-primary, #303133);
+    background: linear-gradient(45deg, var(--primary-color, #409EFF), var(--secondary-color, #67C23A));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -154,8 +163,8 @@ onMounted(() => {
 .schedule-item {
     border-radius: 12px;
     transition: all 0.3s ease;
-    border: 2px solid #ebeef5;
-    background: white;
+    border: 2px solid var(--border-color, #ebeef5);
+    background: var(--panel-bg, white);
 }
 
 .schedule-item:hover {
@@ -179,14 +188,14 @@ onMounted(() => {
 .switch-name {
     font-size: 18px;
     font-weight: 600;
-    color: #303133;
+    color: var(--text-primary, #303133);
 }
 
 .gpio-info {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #909399;
+    color: var(--text-secondary, #909399);
     font-size: 14px;
 }
 
@@ -205,11 +214,19 @@ onMounted(() => {
 
 .time-item {
     display: flex;
-    align-items: center;
-    gap: 12px;
+    flex-direction: column;
+    gap: 10px;
     padding: 12px;
     background: #f5f7fa;
     border-radius: 8px;
+}
+
+.time-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #606266;
+    font-weight: 500;
 }
 
 .time-item .el-icon {
@@ -218,7 +235,23 @@ onMounted(() => {
 }
 
 :deep(.time-input) {
-    width: 120px;
+    width: 100%;
+}
+
+.weekdays-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #f5f7fa;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.weekdays-label {
+    font-weight: 500;
+    color: #606266;
+    margin-bottom: 5px;
+    text-align: center;
 }
 
 .weekdays {
@@ -226,21 +259,6 @@ onMounted(() => {
     flex-wrap: wrap;
     gap: 10px;
     justify-content: center;
-    padding: 15px;
-    background: #f5f7fa;
-    border-radius: 8px;
-}
-
-:deep(.weekday-checkbox) {
-    margin: 0;
-    padding: 8px 12px;
-    border-radius: 6px;
-    background: white;
-    transition: all 0.3s ease;
-}
-
-:deep(.weekday-checkbox:hover) {
-    background: #ecf5ff;
 }
 
 .schedule-actions {
@@ -262,5 +280,121 @@ onMounted(() => {
 .save-button:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(64, 158, 255, 0.2);
+}
+
+:deep(.weekday-checkbox) {
+    margin: 0;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+:deep(.weekday-checkbox:hover) {
+    background: #ecf5ff;
+}
+
+/* 手機模式下的響應式調整 */
+@media screen and (max-width: 768px) {
+    .schedule-container {
+        padding: 10px;
+    }
+
+    .schedule-grid {
+        grid-template-columns: 1fr;
+        padding: 10px;
+        gap: 15px;
+        margin-top: 10px;
+    }
+
+    .schedule-item {
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+    .schedule-content {
+        gap: 15px;
+        padding: 15px 10px;
+    }
+
+    .time-item {
+        padding: 10px 8px;
+    }
+
+    .time-label {
+        font-size: 14px;
+    }
+
+    :deep(.el-time-picker) {
+        width: 100%;
+    }
+
+    :deep(.el-input__wrapper) {
+        width: 100%;
+        padding: 0 10px;
+    }
+
+    .save-button {
+        width: 100%;
+        justify-content: center;
+        margin-top: 5px;
+    }
+
+    .weekdays-container {
+        padding: 12px 8px;
+    }
+
+    .weekdays {
+        gap: 5px;
+    }
+
+    :deep(.weekday-checkbox) {
+        padding: 4px 6px;
+        font-size: 0.85em;
+    }
+
+    :deep(.el-checkbox__label) {
+        font-size: 12px;
+        padding-left: 4px;
+    }
+
+    :deep(.el-checkbox) {
+        margin-right: 2px;
+        height: auto;
+    }
+
+    :deep(.el-checkbox-group) {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    :deep(.el-card__header) {
+        padding: 10px;
+    }
+
+    :deep(.el-card__body) {
+        padding: 10px;
+    }
+
+    .card-header {
+        padding: 5px;
+    }
+
+    .title {
+        font-size: 20px;
+    }
+
+    .switch-name {
+        font-size: 16px;
+    }
+
+    .gpio-info {
+        font-size: 12px;
+    }
+
+    .schedule-header {
+        padding: 10px;
+    }
 }
 </style>
