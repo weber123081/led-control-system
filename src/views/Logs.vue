@@ -1,103 +1,252 @@
 <template>
     <div class="logs-container">
-        <el-card class="logs-card">
+        <!-- 查詢表單 -->
+        <el-card class="query-card">
             <template #header>
                 <div class="card-header">
-                    <h3 class="title">操作日誌</h3>
-                    <el-button type="primary" class="refresh-button" @click="refreshLogs">
+                    <span>日誌查詢</span>
+                    <div>
+                        <el-button type="primary" @click="handleQuery" :loading="loading">
+                            <el-icon>
+                                <Search />
+                            </el-icon>查詢
+                        </el-button>
+                        <el-button @click="resetQuery">
+                            <el-icon>
+                                <Refresh />
+                            </el-icon>重置
+                        </el-button>
+                    </div>
+                </div>
+            </template>
+
+            <el-form :model="queryParams" ref="queryForm" :inline="true" class="query-form">
+                <el-form-item label="時間範圍">
+                    <el-date-picker v-model="dateRange" type="datetimerange" range-separator="至"
+                        start-placeholder="開始時間" end-placeholder="結束時間" :shortcuts="dateShortcuts"
+                        @change="handleDateRangeChange" />
+                </el-form-item>
+                <el-form-item label="操作類型">
+                    <el-select v-model="queryParams.action" placeholder="請選擇" clearable>
+                        <el-option v-for="item in actionOptions" :key="item.value" :label="item.label"
+                            :value="item.value" />
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="狀態">
+                    <el-select v-model="queryParams.status" placeholder="請選擇" clearable>
+                        <el-option label="成功" value="成功" />
+                        <el-option label="失敗" value="失敗" />
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="操作人">
+                    <el-input v-model="queryParams.user" placeholder="請輸入" clearable />
+                </el-form-item>
+                <el-form-item label="設備">
+                    <el-select v-model="queryParams.device" placeholder="請選擇" clearable>
+                        <el-option v-for="device in deviceOptions" :key="device.value" :label="device.label"
+                            :value="device.value" />
+                    </el-select>
+                </el-form-item>
+            </el-form>
+        </el-card>
+
+        <!-- 日誌列表 -->
+        <el-card v-loading="loading">
+            <template #header>
+                <div class="card-header">
+                    <span>操作日誌</span>
+                    <el-button @click="refreshLogs">
                         <el-icon>
                             <Refresh />
-                        </el-icon>
-                        <span class="button-text">刷新</span>
+                        </el-icon>刷新
                     </el-button>
                 </div>
             </template>
-            <div class="logs-content">
-                <!-- 桌面版表格 -->
-                <div class="desktop-table" v-if="!isMobile">
-                    <el-table :data="logs" style="width: 100%" border>
-                        <el-table-column prop="time" label="時間" width="180" />
-                        <el-table-column prop="action" label="操作" width="120">
-                            <template #default="{ row }">
-                                <el-tag :type="row.status === '成功' ? 'success' : 'danger'">
-                                    {{ row.action }}
-                                </el-tag>
-                            </template>
-                        </el-table-column>
-                        <el-table-column prop="status" label="狀態" width="120">
-                            <template #default="{ row }">
-                                <el-tag :type="row.status === '成功' ? 'success' : 'danger'">
-                                    {{ row.status }}
-                                </el-tag>
-                            </template>
-                        </el-table-column>
-                        <el-table-column prop="details" label="詳細信息" />
-                    </el-table>
-                </div>
 
-                <!-- 手機版卡片列表 -->
-                <div class="mobile-logs" v-else>
-                    <div v-for="(log, index) in logs" :key="index" class="log-card">
-                        <div class="log-header">
-                            <div class="log-time">{{ log.time }}</div>
-                            <el-tag :type="log.status === '成功' ? 'success' : 'danger'" class="log-status">
-                                {{ log.status }}
-                            </el-tag>
-                        </div>
-                        <div class="log-body">
-                            <div class="log-action">
-                                <el-tag :type="log.status === '成功' ? 'success' : 'danger'" size="small">
-                                    {{ log.action }}
-                                </el-tag>
-                            </div>
-                            <div class="log-details" v-if="log.details">
-                                {{ log.details }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <el-table :data="logList" border stripe>
+                <el-table-column prop="time" label="時間" sortable="custom" width="180" />
+                <el-table-column prop="user" label="操作人" width="120" />
+                <el-table-column prop="action" label="操作" width="100">
+                    <template #default="{ row }">
+                        <el-tag :type="getActionType(row.action)" size="small">
+                            {{ row.action }}
+                        </el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="device" label="設備" width="120" />
+                <el-table-column prop="description" label="描述" show-overflow-tooltip />
+                <el-table-column prop="status" label="狀態" width="100">
+                    <template #default="{ row }">
+                        <el-tag :type="row.status === '成功' ? 'success' : 'danger'" size="small">
+                            {{ row.status }}
+                        </el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column label="操作" width="100" fixed="right">
+                    <template #default="{ row }">
+                        <el-button type="primary" link @click="showDetails(row)">
+                            詳情
+                        </el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+
+            <!-- 分頁 -->
+            <div class="pagination-container">
+                <el-pagination v-model:current-page="queryParams.page" v-model:page-size="queryParams.limit"
+                    :page-sizes="[10, 20, 50, 100]" :total="total" layout="total, sizes, prev, pager, next, jumper"
+                    @size-change="handleSizeChange" @current-change="handleCurrentChange" />
             </div>
         </el-card>
+
+        <!-- 詳情彈窗 -->
+        <el-dialog v-model="detailsVisible" title="日誌詳情" width="500px">
+            <pre class="details-content">{{ selectedDetails }}</pre>
+        </el-dialog>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import { Search, Refresh } from '@element-plus/icons-vue'
 import { getLogs } from '@/api'
-import { Refresh } from '@element-plus/icons-vue'
 
-const logs = ref([])
-const screenWidth = ref(window.innerWidth)
+// 數據
+const loading = ref(false)
+const logList = ref([])
+const total = ref(0)
+const dateRange = ref([])
+const detailsVisible = ref(false)
+const selectedDetails = ref('')
 
-// 判斷是否為移動設備
-const isMobile = computed(() => {
-    return screenWidth.value < 768
+// 查詢參數
+const queryParams = ref({
+    page: 1,
+    limit: 20,
+    startTime: '',
+    endTime: '',
+    action: '',
+    status: '',
+    user: '',
+    device: '',
+    sortBy: 'timestamp',
+    sortOrder: 'desc'
 })
 
-// 監聽屏幕尺寸變化
-const handleResize = () => {
-    screenWidth.value = window.innerWidth
+// 選項數據
+const actionOptions = [
+    { label: '開啟', value: '開啟' },
+    { label: '關閉', value: '關閉' },
+    { label: '查看', value: '查看' },
+    { label: '設定', value: '設定' }
+]
+
+const deviceOptions = [
+    { label: '客廳燈', value: '客廳燈' },
+    { label: '臥室燈', value: '臥室燈' },
+    { label: '廚房燈', value: '廚房燈' },
+    { label: '所有設備', value: '所有設備' }
+]
+
+const dateShortcuts = [
+    {
+        text: '最近一小時',
+        value: () => {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000)
+            return [start, end]
+        }
+    },
+    {
+        text: '今天',
+        value: () => {
+            const end = new Date()
+            const start = new Date(new Date().setHours(0, 0, 0, 0))
+            return [start, end]
+        }
+    },
+    {
+        text: '本週',
+        value: () => {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+            return [start, end]
+        }
+    }
+]
+
+// 方法
+const handleDateRangeChange = (val) => {
+    queryParams.value.startTime = val ? val[0] : ''
+    queryParams.value.endTime = val ? val[1] : ''
 }
 
-const loadLogs = async () => {
+const getActionType = (action) => {
+    const types = {
+        '開啟': 'success',
+        '關閉': 'warning',
+        '查看': 'info',
+        '設定': 'primary'
+    }
+    return types[action] || 'info'
+}
+
+const handleQuery = async () => {
+    loading.value = true
     try {
-        const response = await getLogs()
-        logs.value = response.data || []
+        const res = await getLogs(queryParams.value)
+        logList.value = res.data
+        total.value = res.total
     } catch (error) {
-        ElMessage.error('獲取日誌失敗')
-        console.error(error)
+        ElMessage.error('查詢日誌失敗')
+        console.error('查詢日誌失敗:', error)
+    } finally {
+        loading.value = false
     }
 }
 
+const resetQuery = () => {
+    dateRange.value = []
+    queryParams.value = {
+        page: 1,
+        limit: 20,
+        startTime: '',
+        endTime: '',
+        action: '',
+        status: '',
+        user: '',
+        device: '',
+        sortBy: 'timestamp',
+        sortOrder: 'desc'
+    }
+    handleQuery()
+}
+
 const refreshLogs = () => {
-    loadLogs()
+    handleQuery()
     ElMessage.success('日誌已刷新')
 }
 
+const handleSizeChange = (val) => {
+    queryParams.value.limit = val
+    handleQuery()
+}
+
+const handleCurrentChange = (val) => {
+    queryParams.value.page = val
+    handleQuery()
+}
+
+const showDetails = (row) => {
+    selectedDetails.value = row.details
+    detailsVisible.value = true
+}
+
 onMounted(() => {
-    loadLogs()
-    window.addEventListener('resize', handleResize)
+    handleQuery()
 })
 </script>
 
@@ -108,156 +257,42 @@ onMounted(() => {
     background-color: var(--bg-color, #f5f7fa);
 }
 
-.logs-card {
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    background: var(--panel-bg, white);
-    border: none;
-}
-
 .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 20px;
 }
 
-.title {
+.query-card {
+    margin-bottom: 20px;
+}
+
+.query-form {
+    margin-top: 20px;
+}
+
+.pagination-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.details-content {
+    white-space: pre-wrap;
+    word-wrap: break-word;
     margin: 0;
-    font-size: 24px;
-    font-weight: 600;
-    color: var(--text-primary, #303133);
-    background: linear-gradient(45deg, var(--primary-color, #409EFF), var(--secondary-color, #67C23A));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.refresh-button {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-}
-
-.logs-content {
-    padding: 20px;
-}
-
-/* 桌面版表格樣式 */
-.desktop-table {
-    margin-top: 10px;
-}
-
-:deep(.el-table) {
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-:deep(.el-table__header) {
+    padding: 10px;
     background-color: #f5f7fa;
+    border-radius: 4px;
+    font-family: monospace;
 }
 
-:deep(.el-table th) {
-    background-color: #f5f7fa;
-    color: #606266;
-    font-weight: 500;
-    padding: 12px;
+:deep(.el-form-item) {
+    margin-bottom: 18px;
+    margin-right: 18px;
 }
 
-:deep(.el-table td) {
-    padding: 12px;
-}
-
-/* 手機版卡片列表樣式 */
-.mobile-logs {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.log-card {
-    background: var(--panel-bg, white);
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    border: 1px solid var(--border-color, #ebeef5);
-    padding: 16px;
-    transition: all 0.3s ease;
-}
-
-.log-card:active {
-    transform: scale(0.98);
-}
-
-.log-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border-color, #ebeef5);
-}
-
-.log-time {
-    font-size: 14px;
-    color: var(--text-secondary, #909399);
-}
-
-.log-status {
-    font-size: 12px;
-}
-
-.log-body {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.log-action {
-    margin-bottom: 4px;
-}
-
-.log-details {
-    font-size: 14px;
-    color: var(--text-primary, #606266);
-    line-height: 1.5;
-}
-
-/* 響應式設計 */
-@media screen and (max-width: 768px) {
-    .logs-container {
-        padding: 10px;
-    }
-
-    .logs-card {
-        border-radius: 10px;
-    }
-
-    .card-header {
-        padding: 12px 15px;
-    }
-
-    .title {
-        font-size: 20px;
-    }
-
-    .button-text {
-        display: none;
-    }
-
-    .refresh-button {
-        padding: 8px;
-    }
-
-    .logs-content {
-        padding: 12px;
-    }
-
-    :deep(.el-card__header) {
-        padding: 10px;
-    }
-
-    :deep(.el-card__body) {
-        padding: 10px;
-    }
+:deep(.el-date-editor) {
+    width: 360px;
 }
 </style>
