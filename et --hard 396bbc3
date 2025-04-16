@@ -1,0 +1,69 @@
+[33md012652[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m)[m 添加用戶管理頁面到導航菜單
+[33mbfa4835[m 修復角色切換功能，更新 localStorage 中的 isAdmin 值
+[33mc75dfd7[m 修復角色切換功能，更新 user store 中的 setUserRole 方法
+[33m9889c87[m 修改登入邏輯，使用authAPI進行驗證
+[33mbbce27a[m 修改API登入驗證邏輯，使用本地驗證
+[33m160fef9[m 更新登入驗證邏輯，統一使用admin/000000
+[33m13b45e8[m[33m ([m[1;31morigin/fix-login-new[m[33m, [m[1;32mfix-login-new[m[33m)[m Update GitHub Actions workflow triggers
+[33m4e016ab[m[33m ([m[1;32mfix-login[m[33m)[m Update GitHub Actions workflow with more debug information
+[33m2375f39[m Fix login validation and authentication issues
+[33m0e9660b[m Fix login and routing issues
+[33m533eaf8[m Add debug steps to build process
+[33m5b1eed5[m Update GitHub Actions versions
+[33m8c665a1[m Add GitHub Pages deployment workflow
+[33me1c5848[m Fix login and routing issues
+[33mb19c0a3[m 修改登入狀態檢查邏輯
+[33m8ea35e4[m Update login credentials and fix authentication state management
+[33mecbad7e[m Switch to hash mode routing for GitHub Pages compatibility
+[33m576581b[m Update login component with authentication logic
+[33m4880a02[m Add authentication check and conditional rendering in App.vue
+[33m11a9b8c[m Fix router configuration for GitHub Pages and add auth guard
+[33m1dcbce4[m Simplify GitHub Pages deployment workflow
+[33m5d1fed3[m Update GitHub Actions to latest versions and add required permissions
+[33m1677efd[m Update GitHub Pages deployment workflow
+[33m7185b78[m Add workflow description comment
+[33mef69c8b[m Fix case sensitivity in view imports
+[33m48a282f[m Update GitHub Actions workflow to use upload-pages-artifact@v3
+[33m4b873b3[m Simplify vite config for GitHub Pages deployment
+[33mda19d3a[m Configure GitHub Pages deployment
+[33m14c1545[m Initial commit: LED Control System
+[33m8709e8f[m[33m ([m[1;31mESP32-LED/master[m[33m, [m[1;32mmaster[m[33m)[m 0814-mdns
+[33m7335c68[m 20240812
+[33m1eb0e92[m 2024/07/03
+[33ma247615[m 2024/07/02
+[33m8a34f85[m 2024/6/28
+[33md891637[m 06-12-logapi
+[33m92adc51[m 20240607-2-sqlapi
+[33m6bb29c5[m 20240607 sql-ok
+[33m47f42a6[m 20240606-sqlapi
+[33m9e76fba[m 20240603
+
+                   SSUUMMMMAARRYY OOFF LLEESSSS CCOOMMMMAANNDDSS
+
+      Commands marked with * may be preceded by a number, _N.
+      Notes in parentheses indicate the behavior if _N is given.
+      A key preceded by a caret indicates the Ctrl key; thus ^K is ctrl-K.
+
+  h  H                 Display this help.
+  q  :q  Q  :Q  ZZ     Exit.
+ ---------------------------------------------------------------------------
+
+                           MMOOVVIINNGG
+
+  e  ^E  j  ^N  CR  *  Forward  one line   (or _N lines).
+  y  ^Y  k  ^K  ^P  *  Backward one line   (or _N lines).
+  f  ^F  ^V  SPACE  *  Forward  one window (or _N lines).
+  b  ^B  ESC-v      *  Backward one window (or _N lines).
+  z                 *  Forward  one window (and set window to _N).
+  w                 *  Backward one window (and set window to _N).
+  ESC-SPACE         *  Forward  one window, but don't stop at end-of-file.
+  d  ^D             *  Forward  one half-window (and set half-window to _N).
+  u  ^U             *  Backward one half-window (and set half-window to _N).
+  ESC-)  RightArrow *  Right one half screen width (or _N positions).
+  ESC-(  LeftArrow  *  Left  one half screen width (or _N positions).
+  ESC-}  ^RightArrow   Right to last column displayed.
+  ESC-{  ^LeftArrow    Left  to first column.
+  F                    Forward forever; like "tail -f".
+  ESC-F                Like F but stop when search pattern is found.
+  r  ^R  ^L            Repaint screen.
+  R                    Repaint screen, discarding buffered input.

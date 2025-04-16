@@ -1,0 +1,41 @@
+[33m6e65110[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/250416-logs[m[33m, [m[1;32m250416-logs[m[33m)[m feat: 簡化日誌頁面，保留核心查詢和顯示功能 - 移除統計卡片和複雜功能，優化查詢表單佈局，保留核心日誌查詢和顯示功能，調整表格和詳情顯示樣式
+[33md83fb28[m[33m ([m[1;31morigin/demo-complete[m[33m, [m[1;32mdemo-complete[m[33m)[m 完成移動設備適配，優化手機模式下的操作日誌和定時設置頁面排版
+[33m396bbc3[m[33m ([m[1;31morigin/main[m[33m)[m 優化移動設備下的角色切換開關位置和樣式
+[33mbfa4835[m 修復角色切換功能，更新 localStorage 中的 isAdmin 值
+[33mc75dfd7[m 修復角色切換功能，更新 user store 中的 setUserRole 方法
+[33m9889c87[m 修改登入邏輯，使用authAPI進行驗證
+[33mbbce27a[m 修改API登入驗證邏輯，使用本地驗證
+[33m160fef9[m 更新登入驗證邏輯，統一使用admin/000000
+[33m13b45e8[m[33m ([m[1;31morigin/fix-login-new[m[33m, [m[1;32mfix-login-new[m[33m)[m Update GitHub Actions workflow triggers
+[33m4e016ab[m[33m ([m[1;32mfix-login[m[33m)[m Update GitHub Actions workflow with more debug information
+[33m2375f39[m Fix login validation and authentication issues
+[33m0e9660b[m Fix login and routing issues
+[33m533eaf8[m Add debug steps to build process
+[33m5b1eed5[m Update GitHub Actions versions
+[33m8c665a1[m Add GitHub Pages deployment workflow
+[33me1c5848[m Fix login and routing issues
+[33mb19c0a3[m 修改登入狀態檢查邏輯
+[33m8ea35e4[m Update login credentials and fix authentication state management
+[33mecbad7e[m Switch to hash mode routing for GitHub Pages compatibility
+[33m576581b[m Update login component with authentication logic
+[33m4880a02[m Add authentication check and conditional rendering in App.vue
+[33m11a9b8c[m Fix router configuration for GitHub Pages and add auth guard
+[33m1dcbce4[m Simplify GitHub Pages deployment workflow
+[33m5d1fed3[m Update GitHub Actions to latest versions and add required permissions
+[33m1677efd[m Update GitHub Pages deployment workflow
+[33m7185b78[m Add workflow description comment
+[33mef69c8b[m Fix case sensitivity in view imports
+[33m48a282f[m Update GitHub Actions workflow to use upload-pages-artifact@v3
+[33m4b873b3[m Simplify vite config for GitHub Pages deployment
+[33mda19d3a[m Configure GitHub Pages deployment
+[33m14c1545[m Initial commit: LED Control System
+[33m8709e8f[m[33m ([m[1;31mESP32-LED/master[m[33m, [m[1;32mmaster[m[33m)[m 0814-mdns
+[33m7335c68[m 20240812
+[33m1eb0e92[m 2024/07/03
+[33ma247615[m 2024/07/02
+[33m8a34f85[m 2024/6/28
+[33md891637[m 06-12-logapi
+[33m92adc51[m 20240607-2-sqlapi
+[33m6bb29c5[m 20240607 sql-ok
+[33m47f42a6[m 20240606-sqlapi
+[33m9e76fba[m 20240603

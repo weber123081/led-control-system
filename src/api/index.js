@@ -33,12 +33,14 @@ const GPIO_PINS = {
 // 4. GPIO34-39 只能用作輸入，不能用作輸出
 // 5. GPIO16-17 通常用於 PSRAM，如果您的板子有 PSRAM，請避免使用
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+
 // 身份驗證和權限管理
 const authAPI = {
     // 驗證用戶身份
     async verifyUser(token) {
         try {
-            const response = await fetch('/api/auth/verify', {
+            const response = await fetch(`${API_BASE_URL}/auth/verify`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
